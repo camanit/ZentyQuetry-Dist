@@ -11,35 +11,26 @@ echo   NIST Post-Quantum Cryptography (PQC) & CBOM Management Engine
 echo ===================================================================
 echo.
 
-:: 1. Cek Python
+if exist "ZentyQuetry.exe" (
+    echo [*] Memulai Standalone Executable ZentyQuetry.exe...
+    echo [*] URL Akses: http://127.0.0.1:9527/
+    echo [*] Tekan Ctrl+C di jendela ini jika ingin menghentikan server.
+    echo.
+    ZentyQuetry.exe
+    goto end
+)
+
+:: Fallback untuk mode source Python
+echo [*] ZentyQuetry.exe tidak ditemukan, menjalankan via Python runtime...
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] Python tidak terdeteksi di sistem PATH!
-    echo         Silakan install Python 3.9+ dari https://www.python.org/
-    echo.
+    echo [ERROR] Python tidak terdeteksi di PATH!
+    echo         Silakan unduh ZentyQuetry.exe atau pasang Python 3.9+.
     pause
     exit /b 1
 )
 
-:: 2. Cek cryptography library
-python -c "import cryptography" >nul 2>&1
-if errorlevel 1 (
-    echo [*] Menginstal dependensi cryptography untuk verifikasi Ed25519...
-    pip install cryptography >nul 2>&1
-    if errorlevel 1 (
-        echo [WARN] Gagal install cryptography otomatis. Menggunakan HMAC-SHA256 fallback.
-    ) else (
-        echo [OK]   Pustaka cryptography siap.
-    )
-) else (
-    echo [OK]   Pustaka cryptography siap (Sovereign Ed25519 aktif).
-)
-
-echo.
-echo [*] Memulai server ZentyQuetry Desktop di http://127.0.0.1:9527...
-echo [*] Tekan Ctrl+C di jendela ini jika ingin menghentikan server.
-echo.
-
 python desktop_runner.py
 
+:end
 pause

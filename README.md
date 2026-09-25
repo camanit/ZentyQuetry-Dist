@@ -6,24 +6,18 @@
 
 ---
 
-## 📖 Ringkasan
-
-**ZentyQuetry™ Sovereign Desktop Edition** dirancang khusus untuk lingkungan berkeamanan tinggi, terisolasi (*air-gapped*), data center perbankan, instansi pertahanan, dan infrastruktur kritis yang mewajibkan audit **Cryptographic Bill of Materials (CBOM)** serta simulasi migrasi **Post-Quantum Cryptography (NIST FIPS 203 ML-KEM, FIPS 204 ML-DSA, FIPS 205 SLH-DSA)** tanpa mengekspos data ke jaringan internet.
-
-Setiap instalasi desktop terikat secara kriptografis (*hardware node-locking*) dengan mesin fisik Anda: **1 Perangkat Fisik = 1 Lisensi Kriptografis**.
-
----
-
 ## ⚡ Quick Start (Cara Menjalankan)
 
-### 🪟 Windows (Metode 1-Click)
-1. Cukup double-click file **`start-zentyquetry.bat`**.
-2. Skrip akan memverifikasi lingkungan Python dan otomatis meluncurkan server lokal di:
+### 🪟 Windows (Metode Paling Mudah — Tanpa Perlu Install Python)
+1. Cukup double-click file **`start-zentyquetry.bat`** (atau langsung double-click **`ZentyQuetry.exe`**).
+2. Aplikasi akan otomatis meluncurkan server lokal aman di:
    ```
    http://127.0.0.1:9527/
    ```
 3. Browser default Anda akan otomatis terbuka ke dasbor ZentyQuetry.
 4. Untuk menghentikan aplikasi, jalankan **`stop-zentyquetry.bat`** atau tekan `Ctrl + C` pada jendela terminal.
+
+*(Tersedia juga paket siap pakai terkompresi di folder **`releases/ZentyQuetry-v1.0.0-windows-x64.zip`**)*
 
 ### 🐧 Linux / 🍎 macOS
 Buka terminal di direktori ini dan jalankan:
@@ -60,7 +54,7 @@ Untuk membuka kapabilitas penuh enterprise:
 
 ## 🔑 Cara Aktivasi Lisensi Enterprise
 
-Setiap instalasi ZentyQuetry Desktop menghasilkan **Hardware Node ID unik**:
+Setiap instalasi ZentyQuetry Desktop terikat pada **Hardware Node ID unik**:
 Format: `ZQ-NODE-XXXX-XXXX-XXXX-XXXX`
 
 1. Jalankan aplikasi, perhatikan **Node ID** yang tertera pada jendela aktivasi atau terminal.
@@ -77,6 +71,7 @@ Format: `ZQ-NODE-XXXX-XXXX-XXXX-XXXX`
 
 | Komponen | Spesifikasi |
 |---|---|
+| **Eksekusi Biner** | Standalone Compiled Native PE Windows (`ZentyQuetry.exe`) & Multi-platform Python Engine |
 | **Protokol Tanda Tangan** | Ed25519 Asymmetric Sovereign Cryptography |
 | **Kunci Publik** | `public_key.pem` (Tersemat pada distribusi) |
 | **Fallback Verifier** | HMAC-SHA256 Machine Seed Lock |
@@ -90,15 +85,18 @@ Format: `ZQ-NODE-XXXX-XXXX-XXXX-XXXX`
 
 ```
 ZentyQuetry-Dist/
+├── ZentyQuetry.exe         # Standalone Windows Binary (Zero-dependency)
 ├── desktop_runner.py       # Engine HTTP server lokal & validator lisensi node-lock
 ├── public_key.pem          # Kunci publik resmi CTARTech untuk verifikasi Ed25519
-├── start-zentyquetry.bat   # Launcher 1-click Windows
+├── start-zentyquetry.bat   # Launcher 1-click Windows (prioritas .exe, fallback python)
 ├── stop-zentyquetry.bat    # Pemati server Windows port 9527
 ├── start-zentyquetry.sh    # Launcher Linux / macOS
 ├── index.html              # Antarmuka web console ZentyQuetry
 ├── app.js                  # Logika aplikasi CBOM & PQC Engine
 ├── styles.css              # Styling antarmuka enterprise
-└── README.md               # Dokumentasi ini
+├── releases/               # Paket distribusi rilis arsip ZIP
+│   └── ZentyQuetry-v1.0.0-windows-x64.zip
+└── README.md               # Panduan teknis distribusi
 ```
 
 ---

@@ -31,7 +31,10 @@ from urllib.parse import urlparse, parse_qs
 
 PORT     = 9527
 HOST     = "127.0.0.1"
-BASE_DIR = Path(__file__).resolve().parent
+if getattr(sys, 'frozen', False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent
 LIC_FILE = BASE_DIR / "license.lic"
 
 # ── Hardware Node Fingerprint ──────────────────────────────────────────────────
