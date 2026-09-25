@@ -22,24 +22,20 @@
         <span>Menu</span>
       </button>
 
-      <div class="brand-container" onclick="switchView('landing', 'guest')">
+      <div class="brand-container" onclick="switchView('tenant-dash', 'tenant')">
         <div class="brand-logo-icon" style="background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;">
           <img src="assets/logo.png" alt="ZentyQuetry Logo" style="width:34px;height:34px;border-radius:7px;box-shadow:0 0 12px rgba(6,182,212,0.4);">
         </div>
         <div>
           <span class="brand-title">ZENTYQUETRY</span>
-          <span class="brand-tag" data-i18n="brandTag">V.0.1 ALPHA</span>
+          <span class="brand-tag">SOVEREIGN V1.0</span>
         </div>
       </div>
     </div>
 
-    <!-- Landing Page Navigation Links -->
-    <ul class="nav-links" id="nav-landing-links">
+    <!-- Landing Page Navigation Links (Hidden in Desktop Mode) -->
+    <ul class="nav-links" id="nav-landing-links" style="display: none;">
       <li><a href="#overview" class="nav-link active" data-i18n="navOverview">Overview</a></li>
-      <li><a href="#sndl-simulator" class="nav-link" data-i18n="navSndl">Mosca Simulator</a></li>
-      <li><a href="#architecture" class="nav-link" data-i18n="navEcosystem">Architecture</a></li>
-      <li><a href="#pricing-plans" class="nav-link" data-i18n="navPricing">Plans & Licensing</a></li>
-      <li><a href="#downloads" class="nav-link" data-i18n="navDownloads">Downloads & CLI</a></li>
     </ul>
 
     <div class="nav-actions">
@@ -49,28 +45,30 @@
         <button id="btn-lang-id" class="lang-btn">ID</button>
       </div>
 
-      <!-- Guest Auth Buttons (Visible on Landing Page) -->
-      <div id="nav-guest-actions" style="display: flex; gap: 0.6rem; align-items: center;">
-        <button class="btn-outline" onclick="openAuthModal('login')" data-i18n="navLogin">Sign In</button>
-        <button class="btn-primary" onclick="openAuthModal('register')" data-i18n="navRegister">Get Started</button>
-      </div>
-
-      <!-- Logged-in User Actions (Visible on Dashboard) -->
-      <div id="nav-user-actions" style="display: none; align-items: center; gap: 0.8rem;">
-        <div class="user-menu-pill">
-          <div class="user-avatar-circle">ZQ</div>
-          <span id="nav-user-name" style="font-weight: 600;">Tenant</span>
-          <span id="nav-role-tag" class="sidebar-role-badge">ROLE</span>
+      <!-- Desktop Sovereign Status (Air-Gap, Plan, Node ID) -->
+      <div id="desktop-sovereign-status" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span class="airgap-badge" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.3); color: var(--accent-cyan); font-family: var(--font-mono);">
+          ● Air-Gap: &lt;0.1ms
+        </span>
+        <span id="desktop-license-pill" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); color: #c084fc; font-family: var(--font-mono);">
+          COMMUNITY (FREE)
+        </span>
+        <span id="desktop-node-capsule" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: #94a3b8; font-family: var(--font-mono);">
+          Node: ZQ-NODE-INIT
+        </span>
+        <div class="user-menu-pill" style="margin-left: 0.2rem;">
+          <div class="user-avatar-circle" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);">ZQ</div>
+          <span style="font-weight: 600;">Sovereign Node Workspace</span>
+          <span id="desktop-status-tag" class="sidebar-role-badge" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3);">AIR-GAP NODE</span>
         </div>
-        <button class="btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="switchView('landing', 'guest')" data-i18n="navLogout">Log Out</button>
       </div>
     </div>
   </header>
 
   <!-- ===================================================================== -->
-  <!-- 1. VIEW: PUBLIC LANDING PAGE                                         -->
+  <!-- 1. VIEW: PUBLIC LANDING PAGE (DORMANT IN DESKTOP)                     -->
   <!-- ===================================================================== -->
-  <main id="view-landing" class="view-container active">
+  <main id="view-landing" class="view-container">
     <!-- Hero Section -->
     <section class="hero" id="overview">
       <div class="hero-pill">
@@ -471,7 +469,7 @@
   <!-- ===================================================================== -->
   <!-- 2. VIEW: TENANT / USER REGULAR DASHBOARD                             -->
   <!-- ===================================================================== -->
-  <main id="view-tenant-dash" class="view-container">
+  <main id="view-tenant-dash" class="view-container active">
     <div class="dashboard-layout">
       <!-- Responsive Drawer Backdrop -->
       <div id="tenant-sidebar-backdrop" class="sidebar-drawer-backdrop" onclick="closeSidebarDrawer()"></div>
@@ -481,8 +479,8 @@
         <div>
           <div class="sidebar-brand-badge" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <div class="sidebar-org-name">PT Cyber Defense</div>
-              <span class="sidebar-role-badge" data-i18n="dashTenantRole">ENTERPRISE TENANT</span>
+              <div class="sidebar-org-name" id="desktop-sidebar-title">Sovereign Node Workspace</div>
+              <span class="sidebar-role-badge" id="desktop-sidebar-role" style="color: #c084fc; border-color: rgba(168,85,247,0.4);">COMMUNITY TIER</span>
             </div>
             <button class="sidebar-drawer-close-btn" onclick="closeSidebarDrawer()" aria-label="Close Sidebar">&times;</button>
           </div>
@@ -578,20 +576,17 @@
                 <span data-i18n="menuLicense">Subscription & License</span>
               </button>
             </li>
-            <li>
-              <button class="sidebar-btn" data-tab="tab-tenant-profile">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span data-i18n="menuProfile">My Profile & Security</span>
-              </button>
-            </li>
           </ul>
         </div>
 
         <div class="sidebar-footer">
-          <button class="sidebar-btn" onclick="switchView('landing', 'guest')" style="color: var(--accent-rose);">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span data-i18n="navLogout">Log Out</span>
-          </button>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 8px; font-size: 0.74rem; color: var(--accent-cyan); font-weight: 600;">
+            <span>🔒</span>
+            <div style="line-height: 1.3;">
+              Sovereign Air-Gap
+              <div style="font-size: 0.68rem; color: var(--text-dim); font-weight: 400;">Local Node Active</div>
+            </div>
+          </div>
         </div>
       </aside>
 
@@ -1982,19 +1977,19 @@ jobs:
               </div>
               <div style="text-align: right; background: rgba(0,0,0,0.3); padding: 1rem 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(244, 63, 94, 0.2);">
                 <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase;">Estimated Financial Exposure</div>
-                <div id="financial-var-amount" style="font-size: 2rem; font-weight: 800; font-family: var(--font-heading); color: var(--accent-rose);">$6,750,000</div>
-                <div id="financial-var-subtext" style="font-size: 0.78rem; color: var(--accent-amber);">Across 15 monitored cryptographic assets</div>
+                <div id="financial-var-amount" style="font-size: 2rem; font-weight: 800; font-family: var(--font-heading); color: var(--accent-emerald);">$0</div>
+                <div id="financial-var-subtext" style="font-size: 0.78rem; color: var(--accent-emerald);">Zero unmitigated quantum exposure (Awaiting scan)</div>
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.88rem;">
               <div>
                 <span style="color: var(--text-dim); display: block; font-size: 0.78rem;">Regulatory Fine Liability:</span>
-                <strong id="financial-fine-amount" style="color: #fda4af;">$2,400,000 (Max 2% Turnover)</strong>
+                <strong id="financial-fine-amount" style="color: var(--accent-emerald);">$0 (Zero Violations Detected)</strong>
               </div>
               <div>
                 <span style="color: var(--text-dim); display: block; font-size: 0.78rem;">Average Incident Forensics:</span>
-                <strong style="color: #cbd5e1;">$1,850,000 (IBM Global Avg)</strong>
+                <strong style="color: var(--text-dim);">$0 (No Incident Recorded)</strong>
               </div>
               <div>
                 <span style="color: var(--text-dim); display: block; font-size: 0.78rem;">PQC Migration Mitigation Cost:</span>
@@ -3398,6 +3393,6 @@ jobs:
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="desktop_app.js"></script>
 </body>
 </html>
