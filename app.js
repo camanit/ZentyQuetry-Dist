@@ -973,7 +973,47 @@ window.closeSidebarDrawer = function() {
   document.querySelectorAll('.sidebar-drawer-backdrop').forEach(b => b.classList.remove('active'));
 };
 
-// Dashboard Tab Navigation (With Auto-Hide Drawer on Mobile)
+// Tab plan requirement map:
+const TAB_TIER_REQUIREMENTS = {
+  // Free Community:
+  'tab-tenant-overview': 'COMMUNITY',
+  'tab-tenant-cbom': 'COMMUNITY',
+  'tab-tenant-playbooks': 'COMMUNITY',
+  'tab-tenant-sndl': 'COMMUNITY',
+  'tab-tenant-license': 'COMMUNITY',
+  'tab-tenant-profile': 'COMMUNITY',
+
+  // Professional:
+  'tab-tenant-benchmark': 'PROFESSIONAL',
+  'tab-tenant-gatekeeper': 'PROFESSIONAL',
+  'tab-tenant-proxy': 'PROFESSIONAL',
+  'tab-tenant-cron': 'PROFESSIONAL',
+  'tab-tenant-compliance': 'PROFESSIONAL',
+  'tab-tenant-reports': 'PROFESSIONAL',
+
+  // Enterprise / Sovereign:
+  'tab-tenant-pki': 'ENTERPRISE',
+  'tab-tenant-tunnel': 'ENTERPRISE',
+  'tab-tenant-audit': 'ENTERPRISE',
+  'tab-tenant-sentinel': 'ENTERPRISE',
+};
+
+window.getCurrentPlanTier = function() {
+  const isDesktop = location.hostname === '127.0.0.1' && (location.port === '9527' || location.port === '8080');
+  if (isDesktop) {
+    const p = (window._licenseStatus?.plan || 'COMMUNITY').toUpperCase();
+    if (p.includes('ENTERPRISE') || p.includes('SOVEREIGN')) return 'ENTERPRISE';
+    if (p.includes('PRO')) return 'PROFESSIONAL';
+    return 'COMMUNITY';
+  } else {
+    const p = (window.currentTenantSubscription?.package_code || window._licenseStatus?.plan || 'community').toUpperCase();
+    if (p.includes('ENTERPRISE') || p.includes('SOVEREIGN')) return 'ENTERPRISE';
+    if (p.includes('PRO')) return 'PROFESSIONAL';
+    return 'COMMUNITY';
+  }
+};
+
+// Dashboard Tab Navigation (With Auto-Hide Drawer on Mobile & Plan Tier Gating)
 function initDashboardTabs() {
   document.querySelectorAll(".sidebar-btn[data-tab]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -990,6 +1030,48 @@ function initDashboardTabs() {
       mainContainer.querySelectorAll(".dash-tab-pane").forEach(pane => pane.classList.remove("active"));
       const targetPane = document.getElementById(targetPaneId);
       if (targetPane) targetPane.classList.add("active");
+
+      // Tier feature gating check for tenant dashboard
+      if (targetPane && TAB_TIER_REQUIREMENTS[targetPaneId]) {
+        const currentTier = window.getCurrentPlanTier();
+        const requiredTier = TAB_TIER_REQUIREMENTS[targetPaneId];
+        let isAllowed = true;
+        if (requiredTier === 'PROFESSIONAL') {
+          isAllowed = (currentTier === 'PROFESSIONAL' || currentTier === 'ENTERPRISE');
+        } else if (requiredTier === 'ENTERPRISE') {
+          isAllowed = (currentTier === 'ENTERPRISE');
+        }
+
+        let lockOverlay = targetPane.querySelector('.tier-locked-overlay');
+        const normalContent = targetPane.querySelectorAll(':scope > *:not(.tier-locked-overlay)');
+        if (!isAllowed) {
+          normalContent.forEach(el => el.style.display = 'none');
+          if (!lockOverlay) {
+            lockOverlay = document.createElement('div');
+            lockOverlay.className = 'tier-locked-overlay';
+            targetPane.prepend(lockOverlay);
+          }
+          lockOverlay.style.display = 'flex';
+          const tierName = requiredTier === 'ENTERPRISE' ? 'Enterprise Sovereign' : 'Professional';
+          const tierClass = requiredTier === 'ENTERPRISE' ? 'ent' : 'pro';
+          lockOverlay.innerHTML = `
+            <div style="font-size: 2.8rem; margin-bottom: 0.6rem;">🔒</div>
+            <span class="badge-tier ${tierClass}" style="font-size: 0.76rem; padding: 3px 12px; margin-bottom: 0.6rem; letter-spacing: 0.06em;">
+              PAKET ${requiredTier} DIBUTUHKAN
+            </span>
+            <h3 style="color: var(--text-main); font-size: 1.35rem; margin-bottom: 0.5rem;">Modul Memerlukan Lisensi ${tierName}</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; max-width: 460px; margin-bottom: 1.5rem;">
+              Fitur ini dirancang khusus untuk proteksi infrastruktur tingkat lanjut. Paket aktif node Anda saat ini adalah <strong style="color: var(--accent-cyan);">${currentTier}</strong>.
+            </p>
+            <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-tenant-license]').click()">
+              Lihat Paket &amp; Aktivasi Lisensi &rarr;
+            </button>
+          `;
+        } else {
+          if (lockOverlay) lockOverlay.style.display = 'none';
+          normalContent.forEach(el => el.style.display = '');
+        }
+      }
 
       // Auto refresh hooks on tab view
       if (targetPaneId === 'tab-tenant-reports' && typeof window.applyReportFilters === 'function') {
@@ -1965,7 +2047,26 @@ window.addEventListener('hashchange', checkHashForVerification);
 
 // Dynamic Overview Dashboard KPI Bars & Curves
 window.updateOverviewKpiCharts = function() {
-  if (!Array.isArray(tenantCBOM) || tenantCBOM.length === 0) return;
+  const hEl = document.getElementById("algo-hybrid-pct");
+  const hBar = document.getElementById("algo-hybrid-bar");
+  const pEl = document.getElementById("algo-pqc-pct");
+  const pBar = document.getElementById("algo-pqc-bar");
+  const rEl = document.getElementById("algo-rsa-pct");
+  const rBar = document.getElementById("algo-rsa-bar");
+  const eEl = document.getElementById("algo-ecc-pct");
+  const eBar = document.getElementById("algo-ecc-bar");
+
+  if (!Array.isArray(tenantCBOM) || tenantCBOM.length === 0) {
+    if (hEl) hEl.textContent = "0% (0 endpoints)";
+    if (hBar) hBar.style.width = "0%";
+    if (pEl) pEl.textContent = "0% (0 endpoints)";
+    if (pBar) pBar.style.width = "0%";
+    if (rEl) rEl.textContent = "0% (0 endpoints)";
+    if (rBar) rBar.style.width = "0%";
+    if (eEl) eEl.textContent = "0% (0 endpoints)";
+    if (eBar) eBar.style.width = "0%";
+    return;
+  }
 
   const total = tenantCBOM.length;
   let hybridCount = 0;
@@ -1992,23 +2093,15 @@ window.updateOverviewKpiCharts = function() {
   const rsaPct = Math.round((rsaCount / total) * 100);
   const eccPct = Math.max(0, 100 - hybridPct - pqcPct - rsaPct);
 
-  const hEl = document.getElementById("algo-hybrid-pct");
-  const hBar = document.getElementById("algo-hybrid-bar");
   if (hEl) hEl.textContent = `${hybridPct}% (${hybridCount} endpoints)`;
   if (hBar) hBar.style.width = `${Math.max(5, hybridPct)}%`;
 
-  const pEl = document.getElementById("algo-pqc-pct");
-  const pBar = document.getElementById("algo-pqc-bar");
   if (pEl) pEl.textContent = `${pqcPct}% (${pqcReadyCount} endpoints)`;
   if (pBar) pBar.style.width = `${Math.max(5, pqcPct)}%`;
 
-  const rEl = document.getElementById("algo-rsa-pct");
-  const rBar = document.getElementById("algo-rsa-bar");
   if (rEl) rEl.textContent = `${rsaPct}% (${rsaCount} endpoints)`;
   if (rBar) rBar.style.width = `${Math.max(5, rsaPct)}%`;
 
-  const eEl = document.getElementById("algo-ecc-pct");
-  const eBar = document.getElementById("algo-ecc-bar");
   if (eEl) eEl.textContent = `${eccPct}% (${eccCount} endpoints)`;
   if (eBar) eBar.style.width = `${Math.max(5, eccPct)}%`;
 };
@@ -2145,15 +2238,8 @@ window.applyReportFilters = function() {
   const standard = document.getElementById("report-filter-standard") ? document.getElementById("report-filter-standard").value : 'all';
   const statusFilter = document.getElementById("report-filter-status") ? document.getElementById("report-filter-status").value : 'all';
 
-  // Base dataset from tenantCBOM
-  let items = Array.isArray(tenantCBOM) && tenantCBOM.length > 0 ? [...tenantCBOM] : [
-    { id: 'rpt-1', target: 'ctar.tech:443', type: 'TLS_SERVICE', algo: 'Hybrid (ML-KEM-768 + X25519)', status: 'hybrid', score: '24.5', lastAudit: 'Today, 09:15 UTC' },
-    { id: 'rpt-2', target: 'api.ctar.tech:443', type: 'REST_API', algo: 'Hybrid (ML-KEM-768 + X25519)', status: 'hybrid', score: '24.5', lastAudit: 'Yesterday, 14:20 UTC' },
-    { id: 'rpt-3', target: 'sentinel-master.ctar.tech:8443', type: 'CONTROL_PLANE', algo: 'ML-DSA-65 (Dilithium)', status: 'ready', score: '12.0', lastAudit: '2 days ago' },
-    { id: 'rpt-4', target: 'auth-sso.ctar.tech:443', type: 'JWT_IDENTITY', algo: 'Hybrid (ECDH + ML-KEM-768)', status: 'hybrid', score: '35.5', lastAudit: '3 days ago' },
-    { id: 'rpt-5', target: 'legacy-gateway.corp.internal:443', type: 'API_GATEWAY', algo: 'RSA-2048 / SHA-256', status: 'vulnerable', score: '88.5', lastAudit: '4 days ago' },
-    { id: 'rpt-6', target: 'db-transit.corp.internal:5432', type: 'TLS_SERVICE', algo: 'ECDSA secp256r1', status: 'vulnerable', score: '82.0', lastAudit: '5 days ago' }
-  ];
+  // Base dataset from tenantCBOM (Strict Tenant Isolation - Zero Mock Leak)
+  let items = Array.isArray(tenantCBOM) ? [...tenantCBOM] : [];
 
   // Filter by status
   if (statusFilter !== 'all') {
@@ -3563,47 +3649,33 @@ window.renderIssuedCertsTable = function() {
 // ============================================================================
 // MODUL 6.5: POST-QUANTUM VPN & ZERO-TRUST TUNNEL (ZENTYTUNNEL)
 // ============================================================================
-let activeTunnelNodes = [
-  {
-    id: "zt-jkt-sin",
-    name: "Jakarta DC <-> AWS Singapore (ap-southeast-1)",
-    localCidr: "10.240.0.1/32",
-    endpoint: "vpn-sin.zentyquetry.com:51820",
-    latency: "18.4 ms",
-    throughput: "940 Mbps",
-    cipher: "ChaCha20-Poly1305 + ML-KEM-768 PSK",
-    status: "CONNECTED",
-    statusColor: "var(--accent-emerald)"
-  },
-  {
-    id: "zt-sby-jkt",
-    name: "Surabaya Branch <-> Jakarta Core DC",
-    localCidr: "10.240.1.1/32",
-    endpoint: "vpn-jkt.zentyquetry.com:51820",
-    latency: "11.2 ms",
-    throughput: "480 Mbps",
-    cipher: "ChaCha20-Poly1305 + ML-KEM-768 PSK",
-    status: "CONNECTED",
-    statusColor: "var(--accent-emerald)"
-  },
-  {
-    id: "zt-cf-k8s",
-    name: "Ingress Gateway <-> Internal Kubernetes VPC",
-    localCidr: "10.240.2.1/32",
-    endpoint: "vpn-k8s.zentyquetry.com:51820",
-    latency: "4.1 ms",
-    throughput: "1.82 Gbps",
-    cipher: "AES-256-GCM + ML-KEM-768 PSK",
-    status: "CONNECTED",
-    statusColor: "var(--accent-emerald)"
-  }
-];
+let activeTunnelNodes = [];
 
 let lastGeneratedWgConf = "";
 
 window.renderTunnelNodes = function() {
   const tbody = document.getElementById("tunnel-nodes-tbody");
   if (!tbody) return;
+
+  const countEl = document.getElementById("tunnel-active-count");
+  if (countEl) countEl.textContent = `${activeTunnelNodes.length} Connected`;
+
+  const tputEl = document.getElementById("tunnel-total-throughput");
+  if (tputEl) tputEl.textContent = activeTunnelNodes.length > 0 ? "3.24 Gbps" : "0 Gbps";
+
+  if (activeTunnelNodes.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 2.5rem 1rem;">
+          Belum ada Post-Quantum Mesh Tunnel yang terkonfigurasi.
+          <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;">
+            Klik <strong>+ Provision Secure Tunnel</strong> untuk membuat rute WireGuard + ML-KEM perdana Anda.
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   tbody.innerHTML = activeTunnelNodes.map(t => `
     <tr>
@@ -3814,56 +3886,30 @@ print("Connected to ZentyQuetry Mesh Overlay.")
 // ============================================================================
 // MODUL 6.6: CI/CD SHIFT-LEFT CBOM GATEKEEPER
 // ============================================================================
-let recentGatekeeperPRs = [
-  {
-    pr: "PR #104",
-    title: "Upgrade API Gateway TLS Handshake to ML-KEM",
-    branch: "feature/pqc-gateway",
-    result: "PASSED (PQC READY)",
-    resultColor: "var(--accent-emerald)",
-    violations: "0 Violations",
-    action: "MERGED",
-    actionColor: "var(--accent-emerald)",
-    date: "10 mins ago"
-  },
-  {
-    pr: "PR #103",
-    title: "Add legacy RSA-2048 token verification",
-    branch: "fix/auth-tokens",
-    result: "BLOCKED (POLICY VIOLATION)",
-    resultColor: "var(--accent-rose)",
-    violations: "1 Critical (crypto/rsa without PQC wrapper)",
-    action: "MERGE BLOCKED",
-    actionColor: "var(--accent-rose)",
-    date: "2 hours ago"
-  },
-  {
-    pr: "PR #102",
-    title: "Microservices auth token refactoring",
-    branch: "refactor/jwt-service",
-    result: "PASSED (PQC READY)",
-    resultColor: "var(--accent-emerald)",
-    violations: "0 Violations",
-    action: "MERGED",
-    actionColor: "var(--accent-emerald)",
-    date: "Yesterday"
-  },
-  {
-    pr: "PR #101",
-    title: "Payment webhook signature validation",
-    branch: "feat/payment-webhook",
-    result: "PASSED (PQC READY)",
-    resultColor: "var(--accent-emerald)",
-    violations: "0 Violations",
-    action: "MERGED",
-    actionColor: "var(--accent-emerald)",
-    date: "2 days ago"
-  }
-];
+let recentGatekeeperPRs = [];
 
 window.renderGatekeeperTable = function() {
   const tbody = document.getElementById("gatekeeper-log-tbody");
   if (!tbody) return;
+
+  const prsVal = document.getElementById("gatekeeper-prs-val");
+  if (prsVal) prsVal.textContent = `${recentGatekeeperPRs.length} PRs`;
+
+  if (recentGatekeeperPRs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2.5rem 1rem;">
+          Belum ada Pull Request yang diaudit oleh Gatekeeper.
+          <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;">
+            Hubungkan GitHub Action Webhook atau jalankan Gatekeeper CLI secara lokal.
+          </div>
+        </td>
+      </tr>
+    `;
+    const pag = document.getElementById("gatekeeper-pagination");
+    if (pag) pag.innerHTML = "";
+    return;
+  }
 
   const state = window.paginationState.gatekeeper || { page: 1, size: 5 };
   const startIndex = (state.page - 1) * state.size;
@@ -4048,62 +4094,35 @@ window.downloadGatekeeperSarif = function() {
 // ============================================================================
 // MODULE 6.7: ZERO-CODE PQC REVERSE PROXY GATEWAY (ENVOY & NGINX FILTER)
 // ============================================================================
-let activePqcProxies = [
-  {
-    id: "gw-ingress-01",
-    name: "Core Banking Ingress",
-    type: "Nginx + OQS Provider",
-    port: 4433,
-    domain: "api.bank-quantum.com",
-    cipher: "X25519_MLKEM768",
-    upstream: "http://10.244.1.18:8080 (Java Core)",
-    latency: "+0.62ms",
-    status: "HEALTHY",
-    handshakes: "412,890"
-  },
-  {
-    id: "gw-sidecar-auth",
-    name: "Payment Auth Sidecar",
-    type: "Envoy Proxy v1.31+",
-    port: 8443,
-    domain: "auth.payment-mesh.internal",
-    cipher: "X25519_MLKEM768",
-    upstream: "http://127.0.0.1:3000 (Node Backend)",
-    latency: "+0.74ms",
-    status: "HEALTHY",
-    handshakes: "284,510"
-  },
-  {
-    id: "gw-k8s-customer",
-    name: "Customer Portal Sidecar",
-    type: "K8s Pod Sidecar",
-    port: 9443,
-    domain: "portal.bank-quantum.com",
-    cipher: "SecP256r1_MLKEM768",
-    upstream: "http://localhost:5000 (Python API)",
-    latency: "+0.88ms",
-    status: "HEALTHY",
-    handshakes: "156,210"
-  },
-  {
-    id: "gw-edge-partner",
-    name: "Partner B2B Gateway",
-    type: "Docker Compose Stack",
-    port: 4443,
-    domain: "b2b.openbanking.io",
-    cipher: "X25519_MLKEM1024",
-    upstream: "http://partner-service:8080 (Go Engine)",
-    latency: "+1.12ms",
-    status: "HEALTHY",
-    handshakes: "89,000"
-  }
-];
+let activePqcProxies = [];
 
 let currentProxyArch = 'nginx';
 
 window.renderPqcProxyTable = function() {
   const tbody = document.getElementById("proxy-inventory-tbody");
   if (!tbody) return;
+
+  const gatewaysVal = document.getElementById("proxy-active-gateways-val");
+  if (gatewaysVal) gatewaysVal.textContent = `${activePqcProxies.length} Running Ingress`;
+
+  const reqsVal = document.getElementById("proxy-handshakes-val");
+  if (reqsVal) reqsVal.textContent = activePqcProxies.length > 0 ? "942,610 reqs" : "0 reqs";
+
+  if (activePqcProxies.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2.5rem 1rem;">
+          Belum ada reverse proxy gateway yang aktif.
+          <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;">
+            Gunakan <strong>Zero-Code Drop-In Proxy Generator</strong> di bawah untuk membuat konfigurasi proxy pertama.
+          </div>
+        </td>
+      </tr>
+    `;
+    const pag = document.getElementById("proxy-pagination");
+    if (pag) pag.innerHTML = "";
+    return;
+  }
 
   const state = window.paginationState.proxy || { page: 1, size: 5 };
   const startIndex = (state.page - 1) * state.size;
@@ -4388,96 +4407,26 @@ window.runLiveProxyProbe = function(proxyId) {
 // ============================================================================
 // MODULE 6.8: AUTOMATED RECURRING CRON SCAN & CERTIFICATE DRIFT DETECTION
 // ============================================================================
-let monitoredCronEndpoints = [
-  {
-    domain: "api.bank-quantum.com",
-    port: 443,
-    protocol: "TLSv1.3",
-    cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM768)",
-    issuer: "ZentyQuetry Sovereign Root CA G2",
-    validTo: "2027-02-15",
-    daysRemaining: 508,
-    driftState: "STABLE",
-    severity: "INFO",
-    statusText: "HEALTHY",
-    badgeBg: "rgba(16, 185, 129, 0.15)",
-    badgeColor: "var(--accent-emerald)"
-  },
-  {
-    domain: "auth.bank-quantum.com",
-    port: 443,
-    protocol: "TLSv1.3",
-    cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM768)",
-    issuer: "ZentyQuetry Sovereign Root CA G2",
-    validTo: "2026-10-13",
-    daysRemaining: 18,
-    driftState: "EXPIRING_SOON",
-    severity: "WARNING",
-    statusText: "EXPIRING IN 18 DAYS",
-    badgeBg: "rgba(245, 158, 11, 0.15)",
-    badgeColor: "var(--accent-amber)"
-  },
-  {
-    domain: "portal.bank-quantum.com",
-    port: 443,
-    protocol: "TLSv1.3",
-    cipher: "TLS_CHACHA20_POLY1305_SHA256 (SecP256r1_MLKEM768)",
-    issuer: "DigiCert Global Root G2 (Hybrid Dual-Sign)",
-    validTo: "2027-05-20",
-    daysRemaining: 602,
-    driftState: "STABLE",
-    severity: "INFO",
-    statusText: "HEALTHY",
-    badgeBg: "rgba(16, 185, 129, 0.15)",
-    badgeColor: "var(--accent-emerald)"
-  },
-  {
-    domain: "partner.openbanking.io",
-    port: 443,
-    protocol: "TLSv1.3",
-    cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM1024)",
-    issuer: "ZentyQuetry Sovereign Root CA G2",
-    validTo: "2027-01-10",
-    daysRemaining: 472,
-    driftState: "STABLE",
-    severity: "INFO",
-    statusText: "HEALTHY",
-    badgeBg: "rgba(16, 185, 129, 0.15)",
-    badgeColor: "var(--accent-emerald)"
-  },
-  {
-    domain: "legacy-vpn.bank.internal",
-    port: 443,
-    protocol: "TLSv1.2",
-    cipher: "ECDHE-RSA-AES256-SHA384 (Non-PQC Classical)",
-    issuer: "Sectigo RSA Domain Validation CA",
-    validTo: "2026-11-05",
-    daysRemaining: 41,
-    driftState: "TLS_DOWNGRADE",
-    severity: "WARNING",
-    statusText: "NON-PQC LEGACY TLS 1.2",
-    badgeBg: "rgba(245, 158, 11, 0.15)",
-    badgeColor: "var(--accent-amber)"
-  },
-  {
-    domain: "checkout.quantum-store.com",
-    port: 443,
-    protocol: "TLSv1.3",
-    cipher: "TLS_AES_128_GCM_SHA256 (X25519_MLKEM768)",
-    issuer: "Let's Encrypt Authority X3 (Dual PQC Hybrid)",
-    validTo: "2026-12-18",
-    daysRemaining: 84,
-    driftState: "STABLE",
-    severity: "INFO",
-    statusText: "HEALTHY",
-    badgeBg: "rgba(16, 185, 129, 0.15)",
-    badgeColor: "var(--accent-emerald)"
-  }
-];
+let monitoredCronEndpoints = [];
 
 window.renderCronEndpointsTable = function() {
   const tbody = document.getElementById("cron-endpoints-tbody");
   if (!tbody) return;
+
+  if (monitoredCronEndpoints.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2.5rem 1rem;">
+          Belum ada jadwal pemantauan sertifikat.
+          <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;">
+            Daftarkan endpoint domain untuk dipantau secara berkala terhadap kedaluwarsa &amp; cipher drift.
+          </div>
+        </td>
+      </tr>
+    `;
+    window.renderPaginationControls("cron-pagination", 0, "cron");
+    return;
+  }
 
   const state = window.paginationState.cron || { page: 1, size: 5 };
   const startIndex = (state.page - 1) * state.size;
@@ -5193,5 +5142,226 @@ function showNotification(message, type = 'info') {
     setTimeout(() => toast.remove(), 400);
   }, 5000);
 }
+
+// ============================================================================
+// DEMO / SANDBOX SIMULATION MODE TOGGLE (OPTIONAL EVALUATION DATA)
+// ============================================================================
+const MOCK_DEMO_SEED = {
+  tunnels: [
+    {
+      id: "zt-jkt-sin",
+      name: "Jakarta DC <-> AWS Singapore (ap-southeast-1)",
+      localCidr: "10.240.0.1/32",
+      endpoint: "vpn-sin.zentyquetry.com:51820",
+      latency: "18.4 ms",
+      throughput: "940 Mbps",
+      cipher: "ChaCha20-Poly1305 + ML-KEM-768 PSK",
+      status: "CONNECTED",
+      statusColor: "var(--accent-emerald)"
+    },
+    {
+      id: "zt-sby-jkt",
+      name: "Surabaya Branch <-> Jakarta Core DC",
+      localCidr: "10.240.1.1/32",
+      endpoint: "vpn-jkt.zentyquetry.com:51820",
+      latency: "11.2 ms",
+      throughput: "480 Mbps",
+      cipher: "ChaCha20-Poly1305 + ML-KEM-768 PSK",
+      status: "CONNECTED",
+      statusColor: "var(--accent-emerald)"
+    },
+    {
+      id: "zt-cf-k8s",
+      name: "Ingress Gateway <-> Internal Kubernetes VPC",
+      localCidr: "10.240.2.1/32",
+      endpoint: "vpn-k8s.zentyquetry.com:51820",
+      latency: "4.1 ms",
+      throughput: "1.82 Gbps",
+      cipher: "AES-256-GCM + ML-KEM-768 PSK",
+      status: "CONNECTED",
+      statusColor: "var(--accent-emerald)"
+    }
+  ],
+  prs: [
+    {
+      pr: "PR #104",
+      title: "Upgrade API Gateway TLS Handshake to ML-KEM",
+      branch: "feature/pqc-gateway",
+      result: "PASSED (PQC READY)",
+      resultColor: "var(--accent-emerald)",
+      violations: "0 Violations",
+      action: "MERGED",
+      actionColor: "var(--accent-emerald)",
+      date: "10 mins ago"
+    },
+    {
+      pr: "PR #103",
+      title: "Add legacy RSA-2048 token verification",
+      branch: "fix/auth-tokens",
+      result: "BLOCKED (POLICY VIOLATION)",
+      resultColor: "var(--accent-rose)",
+      violations: "1 Critical (crypto/rsa without PQC wrapper)",
+      action: "MERGE BLOCKED",
+      actionColor: "var(--accent-rose)",
+      date: "2 hours ago"
+    },
+    {
+      pr: "PR #102",
+      title: "Microservices auth token refactoring",
+      branch: "refactor/jwt-service",
+      result: "PASSED (PQC READY)",
+      resultColor: "var(--accent-emerald)",
+      violations: "0 Violations",
+      action: "MERGED",
+      actionColor: "var(--accent-emerald)",
+      date: "Yesterday"
+    },
+    {
+      pr: "PR #101",
+      title: "Payment webhook signature validation",
+      branch: "feat/payment-webhook",
+      result: "PASSED (PQC READY)",
+      resultColor: "var(--accent-emerald)",
+      violations: "0 Violations",
+      action: "MERGED",
+      actionColor: "var(--accent-emerald)",
+      date: "2 days ago"
+    }
+  ],
+  proxies: [
+    {
+      id: "gw-ingress-01",
+      name: "Core Banking Ingress",
+      type: "Nginx + OQS Provider",
+      port: 4433,
+      domain: "api.bank-quantum.com",
+      cipher: "X25519_MLKEM768",
+      upstream: "http://10.244.1.18:8080 (Java Core)",
+      latency: "+0.62ms",
+      status: "HEALTHY",
+      handshakes: "412,890"
+    },
+    {
+      id: "gw-sidecar-auth",
+      name: "Payment Auth Sidecar",
+      type: "Envoy Proxy v1.31+",
+      port: 8443,
+      domain: "auth.payment-mesh.internal",
+      cipher: "X25519_MLKEM768",
+      upstream: "http://127.0.0.1:3000 (Node Backend)",
+      latency: "+0.74ms",
+      status: "HEALTHY",
+      handshakes: "284,510"
+    },
+    {
+      id: "gw-k8s-customer",
+      name: "Customer Portal Sidecar",
+      type: "K8s Pod Sidecar",
+      port: 9443,
+      domain: "portal.bank-quantum.com",
+      cipher: "SecP256r1_MLKEM768",
+      upstream: "http://localhost:5000 (Python API)",
+      latency: "+0.88ms",
+      status: "HEALTHY",
+      handshakes: "156,210"
+    },
+    {
+      id: "gw-edge-partner",
+      name: "Partner B2B Gateway",
+      type: "Docker Compose Stack",
+      port: 4443,
+      domain: "b2b.openbanking.io",
+      cipher: "X25519_MLKEM1024",
+      upstream: "http://partner-service:8080 (Go Engine)",
+      latency: "+1.12ms",
+      status: "HEALTHY",
+      handshakes: "89,000"
+    }
+  ],
+  cron: [
+    {
+      domain: "api.bank-quantum.com",
+      port: 443,
+      protocol: "TLSv1.3",
+      cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM768)",
+      issuer: "ZentyQuetry Sovereign Root CA G2",
+      validTo: "2027-02-15",
+      daysRemaining: 508,
+      driftState: "STABLE",
+      severity: "INFO",
+      statusText: "HEALTHY",
+      badgeBg: "rgba(16, 185, 129, 0.15)",
+      badgeColor: "var(--accent-emerald)"
+    },
+    {
+      domain: "auth.bank-quantum.com",
+      port: 443,
+      protocol: "TLSv1.3",
+      cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM768)",
+      issuer: "ZentyQuetry Sovereign Root CA G2",
+      validTo: "2026-10-13",
+      daysRemaining: 18,
+      driftState: "EXPIRING_SOON",
+      severity: "WARNING",
+      statusText: "EXPIRING IN 18 DAYS",
+      badgeBg: "rgba(245, 158, 11, 0.15)",
+      badgeColor: "var(--accent-amber)"
+    },
+    {
+      domain: "portal.bank-quantum.com",
+      port: 443,
+      protocol: "TLSv1.3",
+      cipher: "TLS_CHACHA20_POLY1305_SHA256 (SecP256r1_MLKEM768)",
+      issuer: "DigiCert Global Root G2 (Hybrid Dual-Sign)",
+      validTo: "2027-05-20",
+      daysRemaining: 602,
+      driftState: "STABLE",
+      severity: "INFO",
+      statusText: "HEALTHY",
+      badgeBg: "rgba(16, 185, 129, 0.15)",
+      badgeColor: "var(--accent-emerald)"
+    },
+    {
+      domain: "partner.openbanking.io",
+      port: 443,
+      protocol: "TLSv1.3",
+      cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM1024)",
+      issuer: "ZentyQuetry Sovereign Root CA G2",
+      validTo: "2027-01-10",
+      daysRemaining: 472,
+      driftState: "STABLE",
+      severity: "INFO",
+      statusText: "HEALTHY",
+      badgeBg: "rgba(16, 185, 129, 0.15)",
+      badgeColor: "var(--accent-emerald)"
+    }
+  ]
+};
+
+window.toggleDemoSimulationMode = function() {
+  const isCurrentlySeeded = activeTunnelNodes.length > 0 || recentGatekeeperPRs.length > 0;
+  if (isCurrentlySeeded) {
+    // Reset to Zero State
+    activeTunnelNodes = [];
+    recentGatekeeperPRs = [];
+    activePqcProxies = [];
+    monitoredCronEndpoints = [];
+    alert("Data simulasi demo telah dibersihkan. Seluruh modul kembali ke Zero-State (0 data murni).");
+  } else {
+    // Load Demo Data
+    activeTunnelNodes = [...MOCK_DEMO_SEED.tunnels];
+    recentGatekeeperPRs = [...MOCK_DEMO_SEED.prs];
+    activePqcProxies = [...MOCK_DEMO_SEED.proxies];
+    monitoredCronEndpoints = [...MOCK_DEMO_SEED.cron];
+    alert("Data simulasi demo berhasil dimuat untuk showcase. Anda dapat mereset kembali ke 0 kapan saja.");
+  }
+  // Re-render all modules
+  if (typeof renderTunnelNodes === 'function') renderTunnelNodes();
+  if (typeof renderGatekeeperTable === 'function') renderGatekeeperTable();
+  if (typeof renderPqcProxyTable === 'function') renderPqcProxyTable();
+  if (typeof renderCronEndpointsTable === 'function') renderCronEndpointsTable();
+  if (typeof updateOverviewKpiCharts === 'function') updateOverviewKpiCharts();
+};
+
 
 

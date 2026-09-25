@@ -57,6 +57,9 @@
 
       <!-- Logged-in User Actions (Visible on Dashboard) -->
       <div id="nav-user-actions" style="display: none; align-items: center; gap: 0.8rem;">
+        <button class="btn-outline" onclick="toggleDemoSimulationMode()" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(6, 182, 212, 0.4); color: var(--accent-cyan); display: inline-flex; align-items: center; gap: 4px;" title="Toggle Sandbox Simulation Data">
+          ⚡ Demo Data
+        </button>
         <div class="user-menu-pill">
           <div class="user-avatar-circle">ZQ</div>
           <span id="nav-user-name" style="font-weight: 600;">Tenant</span>
@@ -510,36 +513,42 @@
               <button class="sidebar-btn" data-tab="tab-tenant-benchmark">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                 <span data-i18n="menuBenchmark">Agility Benchmark</span>
+                <span class="badge-tier pro">PRO</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-pki">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span data-i18n="menuPki">Quantum CA & PKI Bridge</span>
+                <span class="badge-tier ent">ENT</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-tunnel">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v4H4v-4z"/><path d="M6 10V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"/><circle cx="12" cy="14" r="2"/></svg>
                 <span data-i18n="menuTunnel">ZentyTunnel (PQC VPN)</span>
+                <span class="badge-tier ent">ENT</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-gatekeeper">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                 <span data-i18n="menuGatekeeper">CI/CD Gatekeeper</span>
+                <span class="badge-tier pro">PRO</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-proxy">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/><path d="M12 10v4"/><path d="m15 12-3 2-3-2"/></svg>
                 <span data-i18n="menuProxy">PQC Reverse Proxy</span>
+                <span class="badge-tier pro">PRO</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-cron">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M22 12h-2"/><path d="M6 12H2"/></svg>
                 <span data-i18n="menuCron">Recurring Cron & Drift</span>
+                <span class="badge-tier pro">PRO</span>
               </button>
             </li>
             <li>
@@ -552,24 +561,28 @@
               <button class="sidebar-btn" data-tab="tab-tenant-compliance">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 <span data-i18n="menuCompliance">Global Compliance</span>
+                <span class="badge-tier pro">PRO</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-audit">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 <span data-i18n="menuAudit">Merkle Audit & Ecosystem</span>
+                <span class="badge-tier ent">ENT</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-reports">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 <span data-i18n="menuReports">Executive Reports</span>
+                <span class="badge-tier pro">PRO</span>
               </button>
             </li>
             <li>
               <button class="sidebar-btn" data-tab="tab-tenant-sentinel">
                 <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
                 <span data-i18n="menuSentinel">SentinelOps Agents</span>
+                <span class="badge-tier ent">ENT</span>
               </button>
             </li>
             <li>
@@ -604,7 +617,12 @@
               <h2 class="dash-title">Organization Posture Dashboard</h2>
               <p class="dash-subtitle">Real-time PQC readiness score and cryptographic exposure metrics.</p>
             </div>
-            <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-tenant-cbom]').click()">+ New Scan</button>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button class="btn-outline" onclick="toggleDemoSimulationMode()" style="font-size: 0.78rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;" title="Muat atau bersihkan data simulasi demo">
+                ⚡ <span data-i18n="btnDemoToggle">Simulasi Demo</span>
+              </button>
+              <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-tenant-cbom]').click()">+ New Scan</button>
+            </div>
           </div>
 
           <div class="metrics-grid" style="margin-bottom: 2rem;">
@@ -647,40 +665,40 @@
                 <div class="algo-bar-row">
                   <div class="algo-bar-meta">
                     <span style="color: var(--text-main); font-weight: 600;">Hybrid PQC (ML-KEM-768 + X25519)</span>
-                    <span id="algo-hybrid-pct" style="color: var(--accent-cyan); font-family: var(--font-mono);">40% (6 endpoints)</span>
+                    <span id="algo-hybrid-pct" style="color: var(--accent-cyan); font-family: var(--font-mono);">0% (0 endpoints)</span>
                   </div>
                   <div class="algo-bar-track">
-                    <div id="algo-hybrid-bar" class="algo-bar-fill" style="width: 40%; background: linear-gradient(90deg, #06b6d4, #3b82f6);"></div>
+                    <div id="algo-hybrid-bar" class="algo-bar-fill" style="width: 0%; background: linear-gradient(90deg, #06b6d4, #3b82f6);"></div>
                   </div>
                 </div>
 
                 <div class="algo-bar-row">
                   <div class="algo-bar-meta">
                     <span style="color: var(--text-main); font-weight: 600;">Post-Quantum Signature (ML-DSA Dilithium)</span>
-                    <span id="algo-pqc-pct" style="color: var(--accent-emerald); font-family: var(--font-mono);">20% (3 endpoints)</span>
+                    <span id="algo-pqc-pct" style="color: var(--accent-emerald); font-family: var(--font-mono);">0% (0 endpoints)</span>
                   </div>
                   <div class="algo-bar-track">
-                    <div id="algo-pqc-bar" class="algo-bar-fill" style="width: 20%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                    <div id="algo-pqc-bar" class="algo-bar-fill" style="width: 0%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
                   </div>
                 </div>
 
                 <div class="algo-bar-row">
                   <div class="algo-bar-meta">
                     <span style="color: var(--text-main); font-weight: 600;">Legacy RSA (2048 / 4096-bit)</span>
-                    <span id="algo-rsa-pct" style="color: var(--accent-rose); font-family: var(--font-mono);">27% (4 endpoints)</span>
+                    <span id="algo-rsa-pct" style="color: var(--accent-rose); font-family: var(--font-mono);">0% (0 endpoints)</span>
                   </div>
                   <div class="algo-bar-track">
-                    <div id="algo-rsa-bar" class="algo-bar-fill" style="width: 27%; background: linear-gradient(90deg, #f43f5e, #fb7185);"></div>
+                    <div id="algo-rsa-bar" class="algo-bar-fill" style="width: 0%; background: linear-gradient(90deg, #f43f5e, #fb7185);"></div>
                   </div>
                 </div>
 
                 <div class="algo-bar-row">
                   <div class="algo-bar-meta">
                     <span style="color: var(--text-main); font-weight: 600;">Legacy ECC (secp256r1 / P-384)</span>
-                    <span id="algo-ecc-pct" style="color: var(--accent-amber); font-family: var(--font-mono);">13% (2 endpoints)</span>
+                    <span id="algo-ecc-pct" style="color: var(--accent-amber); font-family: var(--font-mono);">0% (0 endpoints)</span>
                   </div>
                   <div class="algo-bar-track">
-                    <div id="algo-ecc-bar" class="algo-bar-fill" style="width: 13%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+                    <div id="algo-ecc-bar" class="algo-bar-fill" style="width: 0%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
                   </div>
                 </div>
               </div>
@@ -815,28 +833,10 @@
                   </thead>
                   <tbody id="overview-recent-events-tbody">
                     <tr>
-                      <td style="color: var(--text-dim);">10m ago</td>
-                      <td><span class="eco-tag" style="background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan); font-size: 0.7rem;">DISCOVERY</span></td>
-                      <td><code>ctar.tech:443</code></td>
-                      <td><span style="color: var(--accent-emerald);">● Recorded</span></td>
-                    </tr>
-                    <tr>
-                      <td style="color: var(--text-dim);">42m ago</td>
-                      <td><span class="eco-tag" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); font-size: 0.7rem;">ROTATION</span></td>
-                      <td><code>auth-sso.ctar.tech:443</code></td>
-                      <td><span style="color: var(--accent-emerald);">● Hybrid PQC</span></td>
-                    </tr>
-                    <tr>
-                      <td style="color: var(--text-dim);">2h ago</td>
-                      <td><span class="eco-tag" style="background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); font-size: 0.7rem;">GATEKEEPER</span></td>
-                      <td><code>PR #409 (main)</code></td>
-                      <td><span style="color: var(--accent-rose);">● Blocked RSA</span></td>
-                    </tr>
-                    <tr>
-                      <td style="color: var(--text-dim);">5h ago</td>
-                      <td><span class="eco-tag" style="background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); font-size: 0.7rem;">MERKLE CHECK</span></td>
-                      <td><code>Audit Root Consensus</code></td>
-                      <td><span style="color: var(--accent-emerald);">● Unbroken</span></td>
+                      <td colspan="4" style="text-align: center; color: var(--text-dim); padding: 1.8rem 1rem;">
+                        Belum ada operasi telemetri kriptografi tercatat.
+                        <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">Jalankan pemindaian pertama di menu CBOM &amp; Discovery.</div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1982,19 +1982,19 @@ jobs:
               </div>
               <div style="text-align: right; background: rgba(0,0,0,0.3); padding: 1rem 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(244, 63, 94, 0.2);">
                 <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase;">Estimated Financial Exposure</div>
-                <div id="financial-var-amount" style="font-size: 2rem; font-weight: 800; font-family: var(--font-heading); color: var(--accent-rose);">$6,750,000</div>
-                <div id="financial-var-subtext" style="font-size: 0.78rem; color: var(--accent-amber);">Across 15 monitored cryptographic assets</div>
+                <div id="financial-var-amount" style="font-size: 2rem; font-weight: 800; font-family: var(--font-heading); color: var(--accent-emerald);">$0</div>
+                <div id="financial-var-subtext" style="font-size: 0.78rem; color: var(--accent-emerald);">Zero unmitigated quantum exposure (Awaiting scan)</div>
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.88rem;">
               <div>
                 <span style="color: var(--text-dim); display: block; font-size: 0.78rem;">Regulatory Fine Liability:</span>
-                <strong id="financial-fine-amount" style="color: #fda4af;">$2,400,000 (Max 2% Turnover)</strong>
+                <strong id="financial-fine-amount" style="color: var(--accent-emerald);">$0 (Zero Violations Detected)</strong>
               </div>
               <div>
                 <span style="color: var(--text-dim); display: block; font-size: 0.78rem;">Average Incident Forensics:</span>
-                <strong style="color: #cbd5e1;">$1,850,000 (IBM Global Avg)</strong>
+                <strong style="color: var(--text-dim);">$0 (No Incident Recorded)</strong>
               </div>
               <div>
                 <span style="color: var(--text-dim); display: block; font-size: 0.78rem;">PQC Migration Mitigation Cost:</span>
