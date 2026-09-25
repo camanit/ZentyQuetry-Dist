@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 title ZentyQuetry Desktop Edition (Air-Gapped)
 color 0B
 cls
@@ -33,4 +33,4 @@ if errorlevel 1 (
 python desktop_runner.py
 
 :end
-pause
+exit /b 0

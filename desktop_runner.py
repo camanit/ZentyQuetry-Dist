@@ -376,6 +376,11 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
         global LICENSE
         path = urlparse(self.path).path
 
+        # Shutdown endpoint (closes server and terminal automatically)
+        if path == '/api/shutdown':
+            self._handle_shutdown()
+            return
+
         # Node ID endpoint (for app.js bootstrapDesktopLicense)
         if path == '/api/node-id':
             self._json({'node_id': NODE_ID, 'platform': platform.system(),
@@ -427,9 +432,21 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
         # Serve static files normally
         return super().do_GET()
 
+    def _handle_shutdown(self):
+        self._json({'status': 'SUCCESS', 'message': 'ZentyQuetry Desktop Node shutting down...'})
+        def _delayed_exit():
+            time.sleep(0.3)
+            print("\n[!] ZentyQuetry Desktop received shutdown request. Exiting terminal...")
+            os._exit(0)
+        threading.Thread(target=_delayed_exit, daemon=True).start()
+
     def do_POST(self):
         global LICENSE
         path = urlparse(self.path).path
+
+        if path == '/api/shutdown':
+            self._handle_shutdown()
+            return
 
         if path == '/api/local-cbom':
             length = int(self.headers.get('Content-Length', 0))

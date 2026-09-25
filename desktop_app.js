@@ -5338,4 +5338,46 @@ window.toggleDemoSimulationMode = function() {
   if (typeof updateOverviewKpiCharts === 'function') updateOverviewKpiCharts();
 };
 
+// ============================================================================
+// DESKTOP AUTO-SHUTDOWN & TERMINAL CLOSE
+// ============================================================================
+window.exitDesktopApp = async function() {
+  if (!confirm("Apakah Anda yakin ingin keluar dari ZentyQuetry Desktop dan menutup terminal?")) {
+    return;
+  }
+  try {
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/shutdown');
+    } else {
+      await fetch('/api/shutdown', { method: 'POST', keepalive: true });
+    }
+  } catch (e) {
+    console.warn("Shutdown signal sent:", e);
+  }
+
+  // Gracefully close native window
+  window.close();
+
+  // Visual feedback if window cannot be closed by script (e.g. browser tab security)
+  setTimeout(() => {
+    document.body.innerHTML = `
+      <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #060912; color: #94a3b8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 2rem;">
+        <div style="font-size: 3.5rem; margin-bottom: 1.2rem;">🔒</div>
+        <h2 style="color: #e2e8f0; font-size: 1.6rem; margin-bottom: 0.6rem;">ZentyQuetry Desktop Dimatikan</h2>
+        <p style="max-width: 480px; line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem;">
+          Server lokal Sovereign Node dan jendela terminal CMD telah ditutup secara aman. Anda dapat menutup tab ini sekarang.
+        </p>
+        <span style="font-size: 0.8rem; color: #64748b; font-family: monospace;">STATUS: OFFLINE / DISCONNECTED</span>
+      </div>
+    `;
+  }, 250);
+};
+
+// Auto-shutdown on window close
+window.addEventListener('beforeunload', () => {
+  try {
+    navigator.sendBeacon('/api/shutdown');
+  } catch (e) {}
+});
+
 
