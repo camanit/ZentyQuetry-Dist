@@ -379,30 +379,30 @@ function _handleSessionInvalidated(reason) {
     const existingSession = sessionStorage.getItem('zq_session');
     if (!existingSession) {
       const desktopSession = {
+        tenantId: 'sovereign-local-node',
+        tenantName: 'Sovereign Node Workspace',
+        userId: 'sovereign-operator',
+        userName: 'Sovereign Operator',
+        email: 'airgap@local.node',
         role: 'tenant',
-        user: {
-          id: 'sovereign-desktop-user',
-          name: 'Sovereign Operator',
-          email: 'airgap@local.node',
-          role: 'tenant'
-        },
-        tenant: {
-          id: 'desktop-airgap-node',
-          name: 'Air-Gapped Sovereign Node'
-        },
-        token: 'sovereign-airgap-token',
         is_desktop: true
       };
       sessionStorage.setItem('zq_session', JSON.stringify(desktopSession));
-      window.currentTenantId = 'desktop-airgap-node';
+      window.currentTenantId = 'sovereign-local-node';
+      window.currentTenantOrgName = 'Sovereign Node Workspace';
       window.currentUserRole = 'tenant';
     }
 
-    // Direct transition to dashboard workspace
+    // Direct transition to tenant-dash workspace (Bypass Landing Page)
     setTimeout(() => {
       if (typeof window.switchView === 'function') {
-        window.switchView('dashboard', 'tenant');
+        window.switchView('tenant-dash', 'tenant');
         _renderDesktopHeaderBar(nodeId, window._licenseStatus);
+        _applyDesktopSeparation();
+        // Activate Overview Tab by default
+        if (typeof activateTab === 'function') {
+          activateTab('tab-tenant-overview');
+        }
       }
     }, 250);
 
@@ -442,6 +442,53 @@ function _renderDesktopHeaderBar(nodeId, licStatus) {
   `;
 
   userPill.parentNode.insertBefore(bar, userPill);
+}
+
+// Helper: Apply strict desktop separation (Hide Log Out, Hide Cloud Profile, Stay in Workspace)
+function _applyDesktopSeparation() {
+  const isDesktop = location.hostname === '127.0.0.1' && (location.port === '9527' || location.port === '8080');
+  if (!isDesktop) return;
+
+  // 1. Hide Log Out button in header
+  const navLogoutBtn = document.querySelector('#nav-user-actions button[data-i18n="navLogout"]');
+  if (navLogoutBtn) {
+    navLogoutBtn.style.display = 'none';
+  }
+
+  // 2. Sidebar Footer: Replace Log Out button with Sovereign Air-Gap status indicator
+  const sidebarFooter = document.querySelector('.sidebar-footer');
+  if (sidebarFooter) {
+    sidebarFooter.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.8rem;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <div style="color:#10b981;font-size:0.75rem;font-weight:700;">Sovereign Air-Gap</div>
+          <div style="color:#64748b;font-size:0.68rem;">Local Node Security Active</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Prevent brand click from navigating back to marketing landing page
+  const brandContainer = document.querySelector('.brand-container');
+  if (brandContainer) {
+    brandContainer.onclick = (e) => {
+      e.preventDefault();
+      if (typeof activateTab === 'function') activateTab('tab-tenant-overview');
+    };
+  }
+
+  // 4. Hide cloud-only Profile/Password tab in sidebar
+  const profileBtn = document.querySelector('button[data-tab="tab-tenant-profile"]');
+  if (profileBtn && profileBtn.parentElement) {
+    profileBtn.parentElement.style.display = 'none';
+  }
+
+  // 5. Update License tab label to emphasize node-lock
+  const licenseLabel = document.querySelector('button[data-tab="tab-tenant-license"] span');
+  if (licenseLabel) {
+    licenseLabel.textContent = 'Node License & Otorisasi';
+  }
 }
 
 
@@ -520,6 +567,12 @@ window.accessTenantCBOM = function() {
 
 // View Controller (Guest / Tenant / Admin)
 window.switchView = function(viewName, role = 'guest') {
+  const isDesktop = location.hostname === '127.0.0.1' && (location.port === '9527' || location.port === '8080');
+  if (isDesktop && viewName === 'landing') {
+    console.info('[Desktop] Ignoring switch to landing page — sovereign node remains active.');
+    return;
+  }
+
   // Security Guard: Prevent entering dashboard without active authenticated session
   if (viewName !== 'landing') {
     const saved = sessionStorage.getItem('zq_session');
