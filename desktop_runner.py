@@ -425,6 +425,31 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
         self._html(html)
 
 
+def launch_native_window(url: str) -> bool:
+    """Launch as a standalone native desktop window (no address bar / browser tabs) like ZentyElastis."""
+    if sys.platform == "win32":
+        edge_paths = [
+            os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+            os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+            os.path.expandvars(r"%LocalAppData%\Microsoft\Edge\Application\msedge.exe"),
+            "msedge.exe"
+        ]
+        for p in edge_paths:
+            try:
+                cmd = f'"{p}" --app="{url}" --window-size=1440,900 --app-id=CTARTech-ZentyQuetry'
+                import subprocess
+                subprocess.Popen(cmd, shell=True)
+                return True
+            except Exception:
+                continue
+    # Fallback to default browser
+    try:
+        webbrowser.open(url)
+        return True
+    except Exception:
+        return False
+
+
 # ── Entry Point ────────────────────────────────────────────────────────────────
 def run_desktop():
     base_dir = str(BASE_DIR)
@@ -449,10 +474,8 @@ def run_desktop():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer((HOST, PORT), ZQDesktopHandler) as httpd:
         print(f"[+] Serving on http://{HOST}:{PORT}  (Ctrl+C to quit)\n")
-        try:
-            webbrowser.open(f"http://{HOST}:{PORT}")
-        except Exception:
-            pass
+        print("[*] Launching standalone native desktop window...")
+        threading.Thread(target=lambda: (time.sleep(0.6), launch_native_window(f"http://{HOST}:{PORT}")), daemon=True).start()
 
         try:
             httpd.serve_forever()
@@ -464,3 +487,4 @@ def run_desktop():
 
 if __name__ == "__main__":
     run_desktop()
+

@@ -351,36 +351,99 @@ function _handleSessionInvalidated(reason) {
     } catch (_) {}
 
     if (!licDoc) {
-      window._licenseStatus = { status: 'COMMUNITY', plan: 'COMMUNITY', features: ['cbom_scanner', 'pqc_migration'] };
+      window._licenseStatus = { status: 'COMMUNITY', plan: 'COMMUNITY', features: ['cbom_scanner', 'pqc_migration'], node_id: nodeId };
       console.info('[License] No license.lic found — running Community mode.');
-      return;
-    }
-
-    // Validate against server-side API
-    const vr = await fetch('/api/license?action=validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenant_id: window.currentTenantId || 'desktop', node_id: nodeId })
-    });
-
-    if (vr.ok) {
-      const vd = await vr.json();
-      window._licenseStatus = vd;
-      if (vd.status === 'NODE_MISMATCH') {
-        _handleSessionInvalidated('NODE_LOCK');
-      } else if (vd.status === 'EXPIRED') {
-        if (typeof showNotification === 'function') {
-          showNotification('⚠️ Lisensi desktop telah kadaluarsa. Mode Community aktif.', 'warning');
+    } else {
+      // Validate against server-side API or local fallback
+      try {
+        const vr = await fetch('/api/license?action=validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenant_id: window.currentTenantId || 'desktop', node_id: nodeId })
+        });
+        if (vr.ok) {
+          const vd = await vr.json();
+          window._licenseStatus = { ...vd, node_id: nodeId };
+          if (vd.status === 'NODE_MISMATCH') {
+            _handleSessionInvalidated('NODE_LOCK');
+          } else if (vd.status === 'ACTIVE') {
+            console.info(`[License] ${vd.plan} plan aktif — node: ${vd.authorized_node}`);
+          }
         }
-      } else if (vd.status === 'ACTIVE') {
-        console.info(`[License] ${vd.plan} plan aktif — node: ${vd.authorized_node}`);
+      } catch (err) {
+        window._licenseStatus = { status: 'COMMUNITY', plan: 'COMMUNITY', features: ['cbom_scanner', 'pqc_migration'], node_id: nodeId };
       }
     }
+
+    // ── DESKTOP AUTO-ROUTE: Direct to Workspace Dashboard (Bypass Landing Page) ──
+    const existingSession = sessionStorage.getItem('zq_session');
+    if (!existingSession) {
+      const desktopSession = {
+        role: 'tenant',
+        user: {
+          id: 'sovereign-desktop-user',
+          name: 'Sovereign Operator',
+          email: 'airgap@local.node',
+          role: 'tenant'
+        },
+        tenant: {
+          id: 'desktop-airgap-node',
+          name: 'Air-Gapped Sovereign Node'
+        },
+        token: 'sovereign-airgap-token',
+        is_desktop: true
+      };
+      sessionStorage.setItem('zq_session', JSON.stringify(desktopSession));
+      window.currentTenantId = 'desktop-airgap-node';
+      window.currentUserRole = 'tenant';
+    }
+
+    // Direct transition to dashboard workspace
+    setTimeout(() => {
+      if (typeof window.switchView === 'function') {
+        window.switchView('dashboard', 'tenant');
+        _renderDesktopHeaderBar(nodeId, window._licenseStatus);
+      }
+    }, 250);
+
   } catch (e) {
     window._licenseStatus = { status: 'COMMUNITY', plan: 'COMMUNITY', features: ['cbom_scanner'] };
-    console.warn('[License] Bootstrap failed (offline mode):', e.message);
+    console.warn('[License] Bootstrap fallback:', e.message);
   }
 })();
+
+// Helper: Render native desktop license badge in navbar (identical to ZentyElastis)
+function _renderDesktopHeaderBar(nodeId, licStatus) {
+  const userPill = document.querySelector('.user-menu-pill');
+  if (!userPill || document.getElementById('desktop-sovereign-bar')) return;
+
+  const plan = licStatus?.plan || 'COMMUNITY';
+  const isEnt = plan.toUpperCase().includes('ENTERPRISE') || plan.toUpperCase().includes('SOVEREIGN');
+  const badgeColor = isEnt ? '#10b981' : '#a855f7';
+  const badgeBorder = isEnt ? 'rgba(16,185,129,0.3)' : 'rgba(168,85,247,0.3)';
+  const badgeBg = isEnt ? 'rgba(16,185,129,0.1)' : 'rgba(168,85,247,0.1)';
+
+  const bar = document.createElement('div');
+  bar.id = 'desktop-sovereign-bar';
+  bar.style.cssText = 'display:inline-flex;align-items:center;gap:0.55rem;margin-right:0.8rem;font-size:0.75rem;';
+
+  bar.innerHTML = `
+    <span style="display:inline-flex;align-items:center;gap:0.35rem;padding:3px 9px;border-radius:6px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:#06b6d4;font-family:var(--font-mono);font-weight:600;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px #06b6d4;"></span>
+      Air-Gap: &lt;0.1ms
+    </span>
+    <span style="padding:3px 9px;border-radius:6px;background:${badgeBg};border:1px solid ${badgeBorder};color:${badgeColor};font-family:var(--font-mono);font-weight:600;">
+      🔑 ${plan} (${nodeId ? nodeId.split('-').slice(0, 3).join('-') : 'NODE'})
+    </span>
+    <button onclick="if(typeof activateTab==='function'){activateTab('tab-tenant-license');}else{openOfflineLicenseModal();}"
+      style="padding:3px 10px;border-radius:6px;background:linear-gradient(135deg,#06b6d4,#6366f1);border:none;color:#fff;font-weight:700;cursor:pointer;font-size:0.75rem;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(6,182,212,0.3);">
+      ⬆ Upload .lic
+    </button>
+  `;
+
+  userPill.parentNode.insertBefore(bar, userPill);
+}
+
 
 
 // Localization
