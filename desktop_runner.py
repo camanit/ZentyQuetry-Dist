@@ -128,7 +128,16 @@ def validate_license(lic_path: Path = LIC_FILE) -> dict:
             "node_locked": False, "allowed_node": "NONE",
         }
 
-    # 2. Expiry check
+    # 2. Edition check (Desktop requires DESKTOP or HYBRID)
+    edition = (payload.get("edition") or "DESKTOP").upper()
+    if edition == "WEB":
+        return {
+            "valid": False, "plan": "EDITION_MISMATCH", "mode": "EDITION_MISMATCH",
+            "message": "Lisensi ini diterbitkan khusus untuk Web Cloud SaaS.\nUntuk menjalankan Node Desktop Offline, gunakan lisensi Sovereign Node / Hybrid.",
+            "node_locked": False, "allowed_node": "ANY",
+        }
+
+    # 3. Expiry check
     expires_at = payload.get("expires_at")
     perpetual  = payload.get("perpetual", False)
     now_ts     = int(time.time())
