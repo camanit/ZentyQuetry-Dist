@@ -344,6 +344,18 @@ def save_local_cbom(data: list):
 # ── Custom HTTP Handler ────────────────────────────────────────────────────────
 class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
 
+    extensions_map = http.server.SimpleHTTPRequestHandler.extensions_map.copy()
+    extensions_map.update({
+        '.ico': 'image/x-icon',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.svg': 'image/svg+xml',
+        '.json': 'application/json',
+        '.webmanifest': 'application/manifest+json',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+    })
+
     def log_message(self, format, *args):
         # Suppress SimpleHTTPRequestHandler noise
         pass
@@ -362,6 +374,7 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(status)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', len(body))
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         self.wfile.write(body)
 
@@ -375,6 +388,34 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         global LICENSE
         path = urlparse(self.path).path
+
+        # Explicit Favicon & Brand Asset Handling
+        if path == '/favicon.ico':
+            ico_file = BASE_DIR / "favicon.ico"
+            if not ico_file.exists():
+                ico_file = BASE_DIR / "assets" / "logo.ico"
+            if ico_file.exists():
+                data = ico_file.read_bytes()
+                self.send_response(200)
+                self.send_header('Content-Type', 'image/x-icon')
+                self.send_header('Content-Length', str(len(data)))
+                self.send_header('Cache-Control', 'public, max-age=86400')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(data)
+                return
+
+        if path == '/manifest.json':
+            man_file = BASE_DIR / "manifest.json"
+            if man_file.exists():
+                data = man_file.read_bytes()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/manifest+json; charset=utf-8')
+                self.send_header('Content-Length', str(len(data)))
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(data)
+                return
 
         # Shutdown endpoint (closes server and terminal automatically)
         if path == '/api/shutdown':

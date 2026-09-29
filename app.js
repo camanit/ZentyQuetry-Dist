@@ -4106,7 +4106,10 @@ window.renderPqcProxyTable = function() {
   if (gatewaysVal) gatewaysVal.textContent = `${activePqcProxies.length} Running Ingress`;
 
   const reqsVal = document.getElementById("proxy-handshakes-val");
-  if (reqsVal) reqsVal.textContent = activePqcProxies.length > 0 ? "942,610 reqs" : "0 reqs";
+  if (reqsVal) {
+    const totalHandshakes = activePqcProxies.reduce((acc, p) => acc + (parseInt(String(p.handshakes || 0).replace(/,/g, "")) || 0), 0);
+    reqsVal.textContent = `${totalHandshakes.toLocaleString()} reqs`;
+  }
 
   if (activePqcProxies.length === 0) {
     tbody.innerHTML = `
@@ -4412,6 +4415,18 @@ let monitoredCronEndpoints = [];
 window.renderCronEndpointsTable = function() {
   const tbody = document.getElementById("cron-endpoints-tbody");
   if (!tbody) return;
+
+  const countVal = document.getElementById("cron-monitored-val");
+  if (countVal) countVal.textContent = `${monitoredCronEndpoints.length} Endpoints`;
+  const driftsVal = document.getElementById("cron-drifts-val");
+  const warnings = monitoredCronEndpoints.filter(e => e.severity === 'WARNING' || e.severity === 'DANGER').length;
+  if (driftsVal) driftsVal.textContent = `${warnings} Warning${warnings === 1 ? '' : 's'}`;
+  const actionBadge = document.getElementById("cron-action-badge");
+  if (actionBadge) {
+    actionBadge.textContent = warnings > 0 ? `${warnings} Action Item Needed` : `0 Issues Detected`;
+    actionBadge.style.background = warnings > 0 ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)";
+    actionBadge.style.color = warnings > 0 ? "var(--accent-amber)" : "var(--accent-emerald)";
+  }
 
   if (monitoredCronEndpoints.length === 0) {
     tbody.innerHTML = `
@@ -5147,195 +5162,10 @@ function showNotification(message, type = 'info') {
 // DEMO / SANDBOX SIMULATION MODE TOGGLE (OPTIONAL EVALUATION DATA)
 // ============================================================================
 const MOCK_DEMO_SEED = {
-  tunnels: [
-    {
-      id: "zt-jkt-sin",
-      name: "Jakarta DC <-> AWS Singapore (ap-southeast-1)",
-      localCidr: "10.240.0.1/32",
-      endpoint: "vpn-sin.zentyquetry.com:51820",
-      latency: "18.4 ms",
-      throughput: "940 Mbps",
-      cipher: "ChaCha20-Poly1305 + ML-KEM-768 PSK",
-      status: "CONNECTED",
-      statusColor: "var(--accent-emerald)"
-    },
-    {
-      id: "zt-sby-jkt",
-      name: "Surabaya Branch <-> Jakarta Core DC",
-      localCidr: "10.240.1.1/32",
-      endpoint: "vpn-jkt.zentyquetry.com:51820",
-      latency: "11.2 ms",
-      throughput: "480 Mbps",
-      cipher: "ChaCha20-Poly1305 + ML-KEM-768 PSK",
-      status: "CONNECTED",
-      statusColor: "var(--accent-emerald)"
-    },
-    {
-      id: "zt-cf-k8s",
-      name: "Ingress Gateway <-> Internal Kubernetes VPC",
-      localCidr: "10.240.2.1/32",
-      endpoint: "vpn-k8s.zentyquetry.com:51820",
-      latency: "4.1 ms",
-      throughput: "1.82 Gbps",
-      cipher: "AES-256-GCM + ML-KEM-768 PSK",
-      status: "CONNECTED",
-      statusColor: "var(--accent-emerald)"
-    }
-  ],
-  prs: [
-    {
-      pr: "PR #104",
-      title: "Upgrade API Gateway TLS Handshake to ML-KEM",
-      branch: "feature/pqc-gateway",
-      result: "PASSED (PQC READY)",
-      resultColor: "var(--accent-emerald)",
-      violations: "0 Violations",
-      action: "MERGED",
-      actionColor: "var(--accent-emerald)",
-      date: "10 mins ago"
-    },
-    {
-      pr: "PR #103",
-      title: "Add legacy RSA-2048 token verification",
-      branch: "fix/auth-tokens",
-      result: "BLOCKED (POLICY VIOLATION)",
-      resultColor: "var(--accent-rose)",
-      violations: "1 Critical (crypto/rsa without PQC wrapper)",
-      action: "MERGE BLOCKED",
-      actionColor: "var(--accent-rose)",
-      date: "2 hours ago"
-    },
-    {
-      pr: "PR #102",
-      title: "Microservices auth token refactoring",
-      branch: "refactor/jwt-service",
-      result: "PASSED (PQC READY)",
-      resultColor: "var(--accent-emerald)",
-      violations: "0 Violations",
-      action: "MERGED",
-      actionColor: "var(--accent-emerald)",
-      date: "Yesterday"
-    },
-    {
-      pr: "PR #101",
-      title: "Payment webhook signature validation",
-      branch: "feat/payment-webhook",
-      result: "PASSED (PQC READY)",
-      resultColor: "var(--accent-emerald)",
-      violations: "0 Violations",
-      action: "MERGED",
-      actionColor: "var(--accent-emerald)",
-      date: "2 days ago"
-    }
-  ],
-  proxies: [
-    {
-      id: "gw-ingress-01",
-      name: "Core Banking Ingress",
-      type: "Nginx + OQS Provider",
-      port: 4433,
-      domain: "api.bank-quantum.com",
-      cipher: "X25519_MLKEM768",
-      upstream: "http://10.244.1.18:8080 (Java Core)",
-      latency: "+0.62ms",
-      status: "HEALTHY",
-      handshakes: "412,890"
-    },
-    {
-      id: "gw-sidecar-auth",
-      name: "Payment Auth Sidecar",
-      type: "Envoy Proxy v1.31+",
-      port: 8443,
-      domain: "auth.payment-mesh.internal",
-      cipher: "X25519_MLKEM768",
-      upstream: "http://127.0.0.1:3000 (Node Backend)",
-      latency: "+0.74ms",
-      status: "HEALTHY",
-      handshakes: "284,510"
-    },
-    {
-      id: "gw-k8s-customer",
-      name: "Customer Portal Sidecar",
-      type: "K8s Pod Sidecar",
-      port: 9443,
-      domain: "portal.bank-quantum.com",
-      cipher: "SecP256r1_MLKEM768",
-      upstream: "http://localhost:5000 (Python API)",
-      latency: "+0.88ms",
-      status: "HEALTHY",
-      handshakes: "156,210"
-    },
-    {
-      id: "gw-edge-partner",
-      name: "Partner B2B Gateway",
-      type: "Docker Compose Stack",
-      port: 4443,
-      domain: "b2b.openbanking.io",
-      cipher: "X25519_MLKEM1024",
-      upstream: "http://partner-service:8080 (Go Engine)",
-      latency: "+1.12ms",
-      status: "HEALTHY",
-      handshakes: "89,000"
-    }
-  ],
-  cron: [
-    {
-      domain: "api.bank-quantum.com",
-      port: 443,
-      protocol: "TLSv1.3",
-      cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM768)",
-      issuer: "ZentyQuetry Sovereign Root CA G2",
-      validTo: "2027-02-15",
-      daysRemaining: 508,
-      driftState: "STABLE",
-      severity: "INFO",
-      statusText: "HEALTHY",
-      badgeBg: "rgba(16, 185, 129, 0.15)",
-      badgeColor: "var(--accent-emerald)"
-    },
-    {
-      domain: "auth.bank-quantum.com",
-      port: 443,
-      protocol: "TLSv1.3",
-      cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM768)",
-      issuer: "ZentyQuetry Sovereign Root CA G2",
-      validTo: "2026-10-13",
-      daysRemaining: 18,
-      driftState: "EXPIRING_SOON",
-      severity: "WARNING",
-      statusText: "EXPIRING IN 18 DAYS",
-      badgeBg: "rgba(245, 158, 11, 0.15)",
-      badgeColor: "var(--accent-amber)"
-    },
-    {
-      domain: "portal.bank-quantum.com",
-      port: 443,
-      protocol: "TLSv1.3",
-      cipher: "TLS_CHACHA20_POLY1305_SHA256 (SecP256r1_MLKEM768)",
-      issuer: "DigiCert Global Root G2 (Hybrid Dual-Sign)",
-      validTo: "2027-05-20",
-      daysRemaining: 602,
-      driftState: "STABLE",
-      severity: "INFO",
-      statusText: "HEALTHY",
-      badgeBg: "rgba(16, 185, 129, 0.15)",
-      badgeColor: "var(--accent-emerald)"
-    },
-    {
-      domain: "partner.openbanking.io",
-      port: 443,
-      protocol: "TLSv1.3",
-      cipher: "TLS_AES_256_GCM_SHA384 (X25519_MLKEM1024)",
-      issuer: "ZentyQuetry Sovereign Root CA G2",
-      validTo: "2027-01-10",
-      daysRemaining: 472,
-      driftState: "STABLE",
-      severity: "INFO",
-      statusText: "HEALTHY",
-      badgeBg: "rgba(16, 185, 129, 0.15)",
-      badgeColor: "var(--accent-emerald)"
-    }
-  ]
+  tunnels: [],
+  prs: [],
+  proxies: [],
+  cron: []
 };
 
 window.toggleDemoSimulationMode = function() {

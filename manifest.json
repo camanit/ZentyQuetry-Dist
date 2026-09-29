@@ -1,0 +1,23 @@
+{
+  "name": "ZentyQuetry | Enterprise Post-Quantum Cryptography Platform",
+  "short_name": "ZentyQuetry",
+  "description": "NIST Post-Quantum Cryptography (PQC) & CBOM Management Engine",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#060912",
+  "theme_color": "#060912",
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
