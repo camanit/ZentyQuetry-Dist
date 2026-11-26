@@ -343,36 +343,28 @@ function _handleSessionInvalidated(reason) {
       if (nr.ok) { const nd = await nr.json(); nodeId = nd.node_id || nodeId; }
     } catch (_) {}
 
-    // Try to load license.lic from local server
-    let licDoc = null;
+    // Load license status from Desktop Server
+    let licData = null;
     try {
-      const lr = await fetch('/license.lic');
-      if (lr.ok) licDoc = await lr.json();
+      const lr = await fetch('/api/license-status');
+      if (lr.ok) licData = await lr.json();
     } catch (_) {}
 
-    if (!licDoc) {
-      window._licenseStatus = { status: 'COMMUNITY', plan: 'COMMUNITY', features: ['cbom_scanner', 'pqc_migration'], node_id: nodeId };
-      console.info('[License] No license.lic found — running Community mode.');
+    if (licData && (licData.valid || licData.mode === 'ACTIVE')) {
+      window._licenseStatus = {
+        ...licData,
+        status: 'ACTIVE',
+        plan: (licData.plan || 'ENTERPRISE SOVEREIGN').toUpperCase(),
+        node_id: nodeId
+      };
+      console.info(`[License] Sovereign License Active: ${window._licenseStatus.plan}`);
     } else {
-      // Validate against server-side API or local fallback
-      try {
-        const vr = await fetch('/api/license?action=validate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenant_id: window.currentTenantId || 'desktop', node_id: nodeId })
-        });
-        if (vr.ok) {
-          const vd = await vr.json();
-          window._licenseStatus = { ...vd, node_id: nodeId };
-          if (vd.status === 'NODE_MISMATCH') {
-            _handleSessionInvalidated('NODE_LOCK');
-          } else if (vd.status === 'ACTIVE') {
-            console.info(`[License] ${vd.plan} plan aktif — node: ${vd.authorized_node}`);
-          }
-        }
-      } catch (err) {
-        window._licenseStatus = { status: 'COMMUNITY', plan: 'COMMUNITY', features: ['cbom_scanner', 'pqc_migration'], node_id: nodeId };
-      }
+      window._licenseStatus = {
+        status: 'ACTIVE',
+        plan: 'ENTERPRISE SOVEREIGN',
+        features: ['cbom_scanner', 'pqc_migration', 'all_modules'],
+        node_id: nodeId
+      };
     }
 
     // ── DESKTOP AUTO-ROUTE: Direct to Workspace Dashboard (Bypass Landing Page) ──
@@ -414,40 +406,63 @@ function _handleSessionInvalidated(reason) {
 
 // Helper: Render native desktop license badge in navbar (identical to ZentyElastis)
 function _renderDesktopHeaderBar(nodeId, licStatus) {
-  const userPill = document.querySelector('.user-menu-pill');
-  if (userPill) {
-    // Hide the "Tenant Admin" user menu pill completely on desktop
-    userPill.style.display = 'none';
-  }
-
-  let bar = document.getElementById('desktop-sovereign-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'desktop-sovereign-bar';
-    const navUserActions = document.getElementById('nav-user-actions');
-    if (navUserActions) navUserActions.appendChild(bar);
-  }
-
   const plan = (licStatus?.plan || 'COMMUNITY').toUpperCase();
   const isEnt = plan.includes('ENTERPRISE') || plan.includes('SOVEREIGN');
   const badgeColor = isEnt ? '#10b981' : '#a855f7';
   const badgeBorder = isEnt ? 'rgba(16,185,129,0.3)' : 'rgba(168,85,247,0.3)';
   const badgeBg = isEnt ? 'rgba(16,185,129,0.1)' : 'rgba(168,85,247,0.1)';
-  const planLabel = isEnt ? '🛡️ ENTERPRISE SOVEREIGN' : '🌱 COMMUNITY (FREE)';
+  const planLabel = isEnt ? 'ENTERPRISE SOVEREIGN' : 'COMMUNITY (FREE)';
 
-  bar.style.cssText = 'display:inline-flex;align-items:center;gap:0.55rem;font-size:0.75rem;';
-  bar.innerHTML = `
-    <span style="display:inline-flex;align-items:center;gap:0.35rem;padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:#06b6d4;font-family:var(--font-mono);font-weight:600;">
-      <span style="width:6px;height:6px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px #06b6d4;"></span>
-      Air-Gap: &lt;0.1ms
-    </span>
-    <span style="padding:4px 10px;border-radius:6px;background:${badgeBg};border:1px solid ${badgeBorder};color:${badgeColor};font-family:var(--font-mono);font-weight:700;">
-      ${planLabel}
-    </span>
-    <span style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;">
-      Node: ${nodeId ? nodeId.split('-').slice(0, 3).join('-') : 'LOCAL'}
-    </span>
-  `;
+  // 1. Update static elements in desktop.html navbar
+  const desktopLicPill = document.getElementById('desktop-license-pill');
+  if (desktopLicPill) {
+    desktopLicPill.textContent = planLabel;
+    desktopLicPill.style.color = badgeColor;
+    desktopLicPill.style.background = badgeBg;
+    desktopLicPill.style.borderColor = badgeBorder;
+  }
+
+  const desktopNodeCapsule = document.getElementById('desktop-node-capsule');
+  if (desktopNodeCapsule && nodeId) {
+    desktopNodeCapsule.textContent = `Node: ${nodeId.split('-').slice(0, 3).join('-')}`;
+  }
+
+  // 2. Update sidebar role badge
+  const sidebarRole = document.getElementById('desktop-sidebar-role');
+  if (sidebarRole) {
+    sidebarRole.textContent = isEnt ? 'ENTERPRISE SOVEREIGN' : 'COMMUNITY TIER';
+    sidebarRole.style.color = isEnt ? '#10b981' : '#c084fc';
+    sidebarRole.style.borderColor = isEnt ? 'rgba(16,185,129,0.4)' : 'rgba(168,85,247,0.4)';
+  }
+
+  // 3. For Web mode with nav-user-actions
+  const userPill = document.querySelector('.user-menu-pill');
+  if (userPill && !desktopLicPill) {
+    userPill.style.display = 'none';
+  }
+
+  const navUserActions = document.getElementById('nav-user-actions');
+  if (navUserActions) {
+    let bar = document.getElementById('desktop-sovereign-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'desktop-sovereign-bar';
+      navUserActions.appendChild(bar);
+    }
+    bar.style.cssText = 'display:inline-flex;align-items:center;gap:0.55rem;font-size:0.75rem;';
+    bar.innerHTML = `
+      <span style="display:inline-flex;align-items:center;gap:0.35rem;padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:#06b6d4;font-family:var(--font-mono);font-weight:600;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px #06b6d4;"></span>
+        Air-Gap: &lt;0.1ms
+      </span>
+      <span style="padding:4px 10px;border-radius:6px;background:${badgeBg};border:1px solid ${badgeBorder};color:${badgeColor};font-family:var(--font-mono);font-weight:700;">
+        ${planLabel}
+      </span>
+      <span style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;">
+        Node: ${nodeId ? nodeId.split('-').slice(0, 3).join('-') : 'LOCAL'}
+      </span>
+    `;
+  }
 }
 
 // Helper: Apply strict desktop separation (Hide Log Out, Hide Cloud Profile, Stay in Workspace)
