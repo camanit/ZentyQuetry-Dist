@@ -502,7 +502,24 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
                     self._json({'status': 'SUCCESS', 'data': cbom})
                     return
                 if item:
-                    cbom.insert(0, item)
+                    target = item.get('target') or item.get('target_identifier', '')
+                    if not item.get('asset_fingerprint'):
+                        sig = str(item.get('algo', '')) + str(item.get('status', ''))
+                        item['asset_fingerprint'] = hashlib.sha256(f"{target}|{sig}".encode()).hexdigest()
+
+                    # Deduplicate in local CBOM
+                    existing_idx = next((i for i, a in enumerate(cbom) if (a.get('target') == target or a.get('target_identifier') == target)), None)
+                    if existing_idx is not None:
+                        old = cbom[existing_idx]
+                        if old.get('asset_fingerprint') != item['asset_fingerprint']:
+                            item['diff_status'] = 'UPDATED'
+                        else:
+                            item['diff_status'] = 'UNCHANGED'
+                        cbom[existing_idx] = item
+                    else:
+                        item['diff_status'] = 'NEW_ASSET'
+                        cbom.insert(0, item)
+
                     save_local_cbom(cbom)
                     self._json({'status': 'SUCCESS', 'data': cbom})
                     return

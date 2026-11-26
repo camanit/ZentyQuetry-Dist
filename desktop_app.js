@@ -1104,9 +1104,24 @@ function renderTenantCBOM() {
     let badgeClass = item.status === 'vulnerable' ? 'vulnerable' : (item.status === 'hybrid' ? 'hybrid' : 'ready');
     let badgeLabel = item.status === 'vulnerable' ? 'Quantum Vulnerable' : (item.status === 'hybrid' ? 'Hybrid PQC' : 'Quantum Ready');
 
+    let diffBadge = '';
+    if (item.diff_status === 'UPDATED') diffBadge = '<span class="eco-tag" style="background: rgba(14,165,233,0.15); color: var(--accent-cyan); font-size: 0.65rem; padding: 1px 5px; margin-left: 4px;">UPDATED</span>';
+    else if (item.diff_status === 'NEW_ASSET') diffBadge = '<span class="eco-tag" style="background: rgba(16,185,129,0.15); color: var(--accent-emerald); font-size: 0.65rem; padding: 1px 5px; margin-left: 4px;">NEW</span>';
+    else if (item.diff_status === 'EXPIRED') diffBadge = '<span class="eco-tag" style="background: rgba(244,63,94,0.15); color: var(--accent-rose); font-size: 0.65rem; padding: 1px 5px; margin-left: 4px;">EXPIRED</span>';
+
+    let shadowTag = item.is_shadow_crypto ? '<div style="margin-top: 3px;"><span class="eco-tag" style="background: rgba(244,63,94,0.2); color: var(--accent-rose); font-size: 0.65rem; font-weight: 700;">⚠ SHADOW CRYPTO</span></div>' : '';
+    let fpHint = item.asset_fingerprint ? `<div style="font-family: var(--font-mono); font-size: 0.70rem; color: var(--text-dim); margin-top: 2px;" title="${item.asset_fingerprint}">FP: ${item.asset_fingerprint.slice(0, 10)}...</div>` : '';
+
     tr.innerHTML = `
-      <td><strong>${item.target}</strong></td>
-      <td>${item.type}</td>
+      <td>
+        <strong>${item.target}</strong> ${diffBadge}
+        ${fpHint}
+        ${shadowTag}
+      </td>
+      <td>
+        ${item.type}
+        <div style="font-size: 0.70rem; color: var(--text-dim);">${item.scan_mode || 'EDGE_DAEMON'}</div>
+      </td>
       <td><code>${item.algo}</code></td>
       <td><span class="badge-risk ${badgeClass}">${badgeLabel}</span></td>
       <td><strong style="color: ${parseFloat(item.score) > 75 ? 'var(--accent-rose)' : 'var(--accent-emerald)'};">${item.score}/100</strong></td>
