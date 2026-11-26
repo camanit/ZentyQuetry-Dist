@@ -1028,9 +1028,18 @@ function initDashboardTabs() {
       btn.classList.add("active");
 
       const mainContainer = parentSidebar.nextElementSibling;
-      mainContainer.querySelectorAll(".dash-tab-pane").forEach(pane => pane.classList.remove("active"));
+      if (mainContainer) {
+        mainContainer.querySelectorAll(".dash-tab-pane").forEach(pane => pane.classList.remove("active"));
+        mainContainer.scrollTop = 0;
+      }
+      document.querySelectorAll(".dash-tab-pane").forEach(pane => pane.classList.remove("active"));
+      window.scrollTo(0, 0);
+
       const targetPane = document.getElementById(targetPaneId);
-      if (targetPane) targetPane.classList.add("active");
+      if (targetPane) {
+        targetPane.classList.add("active");
+        targetPane.scrollTop = 0;
+      }
 
       // Tier feature gating check for tenant dashboard
       if (targetPane && TAB_TIER_REQUIREMENTS[targetPaneId]) {
