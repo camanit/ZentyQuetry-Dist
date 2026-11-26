@@ -428,8 +428,10 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
                         'hostname': platform.node()})
             return
 
-        # License status endpoint
+        # License status endpoint (dynamically re-validate to detect live updates)
         if path == '/api/license-status':
+            global LICENSE
+            LICENSE = validate_license()
             self._json(LICENSE)
             return
 
@@ -439,6 +441,8 @@ class ZQDesktopHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == '/api/local-stats':
+            global LICENSE
+            LICENSE = validate_license()
             assets = get_local_cbom()
             total = len(assets)
             ready = sum(1 for a in assets if (a.get('status') or '').lower() == 'ready')

@@ -361,11 +361,11 @@ HTML_PAGE = """\
       <div class="g2">
         <div class="fg">
           <label>Tier Lisensi</label>
-          <select id="f-tier">
+          <select id="f-tier" onchange="onTierChange()">
             <option value="Community">&#127358; Community (Free)</option>
-            <option value="Professional">&#11088; Professional</option>
-            <option value="Enterprise" selected>&#127970; Enterprise Airgap</option>
-            <option value="Enterprise Sovereign">&#128081; Enterprise Sovereign</option>
+            <option value="Professional" selected>&#11088; Professional</option>
+            <option value="Enterprise">&#127970; Enterprise Airgap</option>
+            <option value="Enterprise Sovereign">&#128081; Enterprise Sovereign (Tertinggi)</option>
           </select>
         </div>
         <div class="fg">
@@ -452,6 +452,100 @@ HTML_PAGE = """\
       </div>
     </div>
 
+    <!-- FULL WIDTH: TIER COMPARISON REFERENCE MATRIX -->
+    <div class="card" style="grid-column: 1 / -1; margin-top: 1rem;">
+      <div class="ct" style="color: var(--cyn);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Matriks Perbandingan Paket Lisensi ZentyQuetry™ (Panduan Informasi Klien)
+      </div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--bdr); color: var(--tx2);">
+              <th style="padding: 10px 14px;">Fitur &amp; Kemampuan Platform</th>
+              <th style="padding: 10px 14px; color: var(--pur);">Community (Free)</th>
+              <th style="padding: 10px 14px; color: var(--cyn);">Professional (⭐)</th>
+              <th style="padding: 10px 14px; color: var(--grn);">Enterprise Sovereign (👑 Tertinggi)</th>
+            </tr>
+          </thead>
+          <tbody style="color: var(--tx1);">
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">CBOM Discovery &amp; Shadow Crypto</td>
+              <td style="padding: 9px 14px;">✅ Tersedia (Maks 25 Aset)</td>
+              <td style="padding: 9px 14px;">✅ Penuh (Hingga 500 Aset)</td>
+              <td style="padding: 9px 14px; color: var(--grn); font-weight: 600;">✅ Unlimited Local Assets</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">PQC Code Playbooks &amp; Refactoring</td>
+              <td style="padding: 9px 14px;">✅ Snippets Dasar</td>
+              <td style="padding: 9px 14px;">✅ Full Refactoring Engine</td>
+              <td style="padding: 9px 14px;">✅ Full Enterprise Multi-Lang</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">AI Mosca Risk (SNDL Exposure)</td>
+              <td style="padding: 9px 14px;">✅ Mode Standar</td>
+              <td style="padding: 9px 14px;">✅ Telemetri Lanjutan</td>
+              <td style="padding: 9px 14px;">✅ Prediktif Threat Modeling</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">Crypto Agility Benchmark &amp; Stress Test</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--cyn);">✅ Terbuka Penuh</td>
+              <td style="padding: 9px 14px; color: var(--grn);">✅ Terbuka Penuh</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">CI/CD Gatekeeper (Shift-Left)</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--cyn);">✅ Terbuka Penuh</td>
+              <td style="padding: 9px 14px; color: var(--grn);">✅ Terbuka Penuh</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">Zero-Code PQC Reverse Proxy Gateway</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--cyn);">✅ Terbuka Penuh</td>
+              <td style="padding: 9px 14px; color: var(--grn);">✅ Terbuka Penuh</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">Recurring Cron &amp; Certificate Drift</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--cyn);">✅ Terbuka Penuh</td>
+              <td style="padding: 9px 14px; color: var(--grn);">✅ Terbuka Penuh</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">Global Compliance &amp; Executive Reports</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--cyn);">✅ Terbuka Penuh</td>
+              <td style="padding: 9px 14px; color: var(--grn);">✅ Terbuka Penuh</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">Quantum CA &amp; PKI Bridge (FIPS 203)</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci (Paket Ent)</td>
+              <td style="padding: 9px 14px; color: var(--grn); font-weight: 600;">✅ Eksklusif Enterprise</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">ZentyTunnel PQC VPN (Zero-Trust)</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci (Paket Ent)</td>
+              <td style="padding: 9px 14px; color: var(--grn); font-weight: 600;">✅ Eksklusif Enterprise</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <td style="padding: 9px 14px; font-weight: 600;">Merkle Audit &amp; Immutable Ledger</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci (Paket Ent)</td>
+              <td style="padding: 9px 14px; color: var(--grn); font-weight: 600;">✅ Eksklusif Enterprise</td>
+            </tr>
+            <tr>
+              <td style="padding: 9px 14px; font-weight: 600;">SentinelOps Autonomous Remediation</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci</td>
+              <td style="padding: 9px 14px; color: var(--tx3);">🔒 Terkunci (Paket Ent)</td>
+              <td style="padding: 9px 14px; color: var(--grn); font-weight: 600;">✅ Multi-Core High-Throughput</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -474,6 +568,44 @@ async function loadMachineInfo() {
 function useThisNode() {
   document.getElementById('f-node').value = document.getElementById('this-node').textContent;
   toast('Node ID di-paste ke form!', '#06b6d4');
+}
+
+function onTierChange() {
+  const tier = document.getElementById('f-tier').value;
+  const nodesSel = document.getElementById('f-nodes');
+  const assetsInp = document.getElementById('f-assets');
+  
+  if (tier === 'Community') {
+    nodesSel.value = '4';
+    assetsInp.value = '25';
+    document.getElementById('ft-cbom').checked = true;
+    document.getElementById('ft-pqc').checked = true;
+    ['ft-sentinel','ft-api','ft-multi','ft-audit','ft-pki','ft-sla'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = false;
+    });
+    toast('Preset Community (Free) dipilih', '#c084fc');
+  } else if (tier === 'Professional') {
+    nodesSel.value = '16';
+    assetsInp.value = '500';
+    document.getElementById('ft-cbom').checked = true;
+    document.getElementById('ft-pqc').checked = true;
+    document.getElementById('ft-api').checked = true;
+    document.getElementById('ft-sla').checked = true;
+    ['ft-sentinel','ft-multi','ft-audit','ft-pki'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = false;
+    });
+    toast('Preset Professional (⭐) dipilih', '#06b6d4');
+  } else if (tier.includes('Enterprise')) {
+    nodesSel.value = tier.includes('Sovereign') ? '0' : '64';
+    assetsInp.value = tier.includes('Sovereign') ? '10000' : '2500';
+    ['ft-cbom','ft-pqc','ft-sentinel','ft-api','ft-multi','ft-audit','ft-pki','ft-sla'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = true;
+    });
+    toast('Preset Enterprise Sovereign (👑) dipilih', '#10b981');
+  }
 }
 
 async function generateLicense() {

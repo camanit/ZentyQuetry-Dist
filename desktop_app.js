@@ -402,10 +402,27 @@ function _handleSessionInvalidated(reason) {
 function _renderDesktopHeaderBar(nodeId, licStatus) {
   const plan = (licStatus?.plan || 'COMMUNITY').toUpperCase();
   const isEnt = plan.includes('ENTERPRISE') || plan.includes('SOVEREIGN');
-  const badgeColor = isEnt ? '#10b981' : '#a855f7';
-  const badgeBorder = isEnt ? 'rgba(16,185,129,0.3)' : 'rgba(168,85,247,0.3)';
-  const badgeBg = isEnt ? 'rgba(16,185,129,0.1)' : 'rgba(168,85,247,0.1)';
-  const planLabel = isEnt ? 'ENTERPRISE SOVEREIGN' : 'COMMUNITY (FREE)';
+  const isPro = plan.includes('PRO');
+
+  let badgeColor = '#c084fc';
+  let badgeBorder = 'rgba(168,85,247,0.35)';
+  let badgeBg = 'rgba(168,85,247,0.12)';
+  let planLabel = '🌱 COMMUNITY (FREE)';
+  let sidebarText = 'COMMUNITY TIER';
+
+  if (isEnt) {
+    badgeColor = '#10b981';
+    badgeBorder = 'rgba(16,185,129,0.35)';
+    badgeBg = 'rgba(16,185,129,0.12)';
+    planLabel = '🛡️ ENTERPRISE SOVEREIGN';
+    sidebarText = 'ENTERPRISE SOVEREIGN';
+  } else if (isPro) {
+    badgeColor = '#06b6d4';
+    badgeBorder = 'rgba(6,182,212,0.35)';
+    badgeBg = 'rgba(6,182,212,0.12)';
+    planLabel = '⭐ PROFESSIONAL';
+    sidebarText = 'PROFESSIONAL TIER';
+  }
 
   // 1. Update static elements in desktop.html navbar
   const desktopLicPill = document.getElementById('desktop-license-pill');
@@ -424,9 +441,9 @@ function _renderDesktopHeaderBar(nodeId, licStatus) {
   // 2. Update sidebar role badge
   const sidebarRole = document.getElementById('desktop-sidebar-role');
   if (sidebarRole) {
-    sidebarRole.textContent = isEnt ? 'ENTERPRISE SOVEREIGN' : 'COMMUNITY TIER';
-    sidebarRole.style.color = isEnt ? '#10b981' : '#c084fc';
-    sidebarRole.style.borderColor = isEnt ? 'rgba(16,185,129,0.4)' : 'rgba(168,85,247,0.4)';
+    sidebarRole.textContent = sidebarText;
+    sidebarRole.style.color = badgeColor;
+    sidebarRole.style.borderColor = badgeBorder;
   }
 
   // 3. For Web mode with nav-user-actions
