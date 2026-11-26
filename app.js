@@ -3,7 +3,7 @@
 
 const TRANSLATIONS = {
   en: {
-    brandTag: "V.0.1 ALPHA",
+    brandTag: "V.1.0 ENTERPRISE",
     navOverview: "Overview",
     navSndl: "Mosca Simulator",
     navEcosystem: "Architecture",
@@ -110,7 +110,7 @@ const TRANSLATIONS = {
   },
 
   id: {
-    brandTag: "V.0.1 ALFA",
+    brandTag: "V.1.0 ENTERPRISE",
     navOverview: "Ikhtisar",
     navSndl: "Simulator Mosca",
     navEcosystem: "Arsitektur",
