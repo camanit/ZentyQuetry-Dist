@@ -90,12 +90,31 @@ const TRANSLATIONS = {
     menuGatekeeper: "CI/CD Gatekeeper",
     menuProxy: "PQC Reverse Proxy",
     menuCron: "Recurring Cron & Drift",
+    menuCompliance: "Global Compliance",
+    menuAudit: "Merkle Audit & Ecosystem",
+    menuReports: "Executive Reports",
     btnPqcPlaybook: "PQC Code Playbooks",
     btnExportCyclone: "Download CycloneDX 1.6 JSON",
     menuSndl: "AI Mosca Risk",
     menuSentinel: "SentinelOps Agents",
     menuLicense: "Subscription & License",
     menuProfile: "My Profile & Security",
+    navExit: "Exit",
+    navExitApp: "Exit Application",
+    dashAirgapBadge: "Local Node Active",
+    dashAirgapTitle: "Sovereign Air-Gap",
+    dashNoEvents: "No cryptographic telemetry operations recorded yet.",
+    dashNoEventsSub: "Run your first scan in the CBOM & Discovery menu.",
+    upgGuideTitle: "Quick Upgrade & License Activation Guide",
+    upgGuideDesc: "Simple steps to update application binaries or activate Professional / Enterprise Sovereign licenses in offline air-gap mode.",
+    upgStep1Title: "Download Latest Binary / Release",
+    upgStep1Desc: "Download the <code>ZentyQuetry-v1.0.0-windows-x64.zip</code> package from the official repository. Extract and replace binary files or run directly without clearing existing configuration.",
+    upgStep2Title: "Verify Hardware Node ID",
+    upgStep2Desc: "Open the desktop app, copy your machine's <code>Node ID</code> in <em>Subscription & License</em> (e.g., <code>ZQ-NODE-XXXX-XXXX</code>) as the anti-duplication hardware identity.",
+    upgStep3Title: "Issue Cryptographic License",
+    upgStep3Desc: "Use the License Authority portal (<code>http://127.0.0.1:9528</code>), select <strong>Professional</strong> or <strong>Enterprise Sovereign</strong>, then generate the <code>license.lic</code> file.",
+    upgStep4Title: "Instant Auto-Activation (Zero Prompt)",
+    upgStep4Desc: "Place <code>license.lic</code> in the application folder. Launch <code>ZentyQuetry.exe</code>, all licensed modules unlock immediately without requiring an internet connection.",
     agentlessScanTitle: "Agentless Remote Domain Scanner",
     agentlessScanDesc: "Scan public web services, APIs, and portals without installing any software on your servers.",
     btnStartRemoteScan: "Run Remote Scan",
@@ -192,12 +211,31 @@ const TRANSLATIONS = {
     menuGatekeeper: "Gatekeeper CI/CD",
     menuProxy: "Reverse Proxy PQC",
     menuCron: "Pemindaian Cron & Drift",
+    menuCompliance: "Kepatuhan Regulasi Global",
+    menuAudit: "Audit Merkle & Ekosistem",
+    menuReports: "Laporan Eksekutif",
     btnPqcPlaybook: "Buku Panduan Kode PQC",
     btnExportCyclone: "Unduh CycloneDX 1.6 JSON",
     menuSndl: "AI Risiko Mosca",
     menuSentinel: "Agen SentinelOps",
     menuLicense: "Langganan & Lisensi",
     menuProfile: "Profil Saya & Keamanan",
+    navExit: "Keluar",
+    navExitApp: "Keluar Aplikasi",
+    dashAirgapBadge: "Node Lokal Aktif",
+    dashAirgapTitle: "Air-Gap Berdaulat",
+    dashNoEvents: "Belum ada operasi telemetri kriptografi tercatat.",
+    dashNoEventsSub: "Jalankan pemindaian pertama di menu CBOM & Discovery.",
+    upgGuideTitle: "Panduan Cepat Upgrade Versi & Aktivasi Lisensi",
+    upgGuideDesc: "Langkah mudah memperbarui binary aplikasi atau mengaktifkan lisensi Professional / Enterprise Sovereign secara luring (offline air-gap).",
+    upgStep1Title: "Unduh Binary / Rilis Terbaru",
+    upgStep1Desc: "Unduh paket <code>ZentyQuetry-v1.0.0-windows-x64.zip</code> dari repositori resmi. Ekstrak dan ganti file biner atau jalankan langsung tanpa menghapus konfigurasi lama.",
+    upgStep2Title: "Periksa Hardware Node ID",
+    upgStep2Desc: "Buka aplikasi desktop, salin <code>Node ID</code> mesin Anda di menu <em>Subscription & License</em> (misal: <code>ZQ-NODE-XXXX-XXXX</code>) sebagai identitas hardware anti-duplikasi.",
+    upgStep3Title: "Terbitkan Lisensi Kriptografi",
+    upgStep3Desc: "Gunakan portal License Authority (<code>http://127.0.0.1:9528</code>), pilih paket <strong>Professional</strong> atau <strong>Enterprise Sovereign</strong>, lalu terbitkan berkas <code>license.lic</code>.",
+    upgStep4Title: "Otomatis Aktif (Zero Prompt)",
+    upgStep4Desc: "Letakkan <code>license.lic</code> di folder aplikasi. Jalankan <code>ZentyQuetry.exe</code>, semua modul berlisensi langsung terbuka penuh seketika tanpa perlu koneksi internet.",
     agentlessScanTitle: "Pemindai Domain Jarak Jauh (Tanpa Agen)",
     agentlessScanDesc: "Pindai layanan web publik, API, dan portal tanpa perlu menginstal perangkat lunak di server Anda.",
     btnStartRemoteScan: "Jalankan Pemindaian Remote",
@@ -550,11 +588,18 @@ function setLanguage(lang) {
   document.querySelectorAll("[data-i18n]").forEach(elem => {
     const key = elem.getAttribute("data-i18n");
     if (dict[key]) {
-      elem.textContent = dict[key];
+      if (dict[key].includes("<") && dict[key].includes(">")) {
+        elem.innerHTML = dict[key];
+      } else {
+        elem.textContent = dict[key];
+      }
     }
   });
 
   calculateMosca();
+  if (typeof loadTenantOverview === 'function') {
+    loadTenantOverview();
+  }
 }
 
 // Session Persistence
@@ -1093,19 +1138,27 @@ function initDashboardTabs() {
             targetPane.prepend(lockOverlay);
           }
           lockOverlay.style.display = 'flex';
+          const isId = (typeof currentLang !== 'undefined' && currentLang === 'id');
           const tierName = requiredTier === 'ENTERPRISE' ? 'Enterprise Sovereign' : 'Professional';
           const tierClass = requiredTier === 'ENTERPRISE' ? 'ent' : 'pro';
+          const badgeText = isId ? `PAKET ${requiredTier} DIBUTUHKAN` : `${requiredTier} PLAN REQUIRED`;
+          const titleText = isId ? `Modul Memerlukan Lisensi ${tierName}` : `Module Requires ${tierName} License`;
+          const descText = isId ?
+            `Fitur ini dirancang khusus untuk proteksi infrastruktur tingkat lanjut. Paket aktif node Anda saat ini adalah <strong style="color: var(--accent-cyan);">${currentTier}</strong>.` :
+            `This capability is designed for advanced enterprise infrastructure protection. Your active node plan is <strong style="color: var(--accent-cyan);">${currentTier}</strong>.`;
+          const btnText = isId ? `Lihat Paket &amp; Aktivasi Lisensi &rarr;` : `View Plans &amp; Activate License &rarr;`;
+
           lockOverlay.innerHTML = `
             <div style="font-size: 2.8rem; margin-bottom: 0.6rem;">🔒</div>
             <span class="badge-tier ${tierClass}" style="font-size: 0.76rem; padding: 3px 12px; margin-bottom: 0.6rem; letter-spacing: 0.06em;">
-              PAKET ${requiredTier} DIBUTUHKAN
+              ${badgeText}
             </span>
-            <h3 style="color: var(--text-main); font-size: 1.35rem; margin-bottom: 0.5rem;">Modul Memerlukan Lisensi ${tierName}</h3>
+            <h3 style="color: var(--text-main); font-size: 1.35rem; margin-bottom: 0.5rem;">${titleText}</h3>
             <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; max-width: 460px; margin-bottom: 1.5rem;">
-              Fitur ini dirancang khusus untuk proteksi infrastruktur tingkat lanjut. Paket aktif node Anda saat ini adalah <strong style="color: var(--accent-cyan);">${currentTier}</strong>.
+              ${descText}
             </p>
             <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-tenant-license]').click()">
-              Lihat Paket &amp; Aktivasi Lisensi &rarr;
+              ${btnText}
             </button>
           `;
         } else {
@@ -1289,7 +1342,9 @@ async function loadTenantSubscription() {
   const isDesktop = location.hostname === '127.0.0.1' && (location.port === '9527' || location.port === '8080');
   if (isDesktop) {
     const lic = window._licenseStatus || { plan: 'COMMUNITY', status: 'ACTIVE' };
-    const isEnt = (lic.plan || '').toUpperCase().includes('ENTERPRISE') || (lic.plan || '').toUpperCase().includes('SOVEREIGN');
+    const planUpper = (lic.plan || 'COMMUNITY').toUpperCase();
+    const isEnt = planUpper.includes('ENTERPRISE') || planUpper.includes('SOVEREIGN');
+    const isPro = planUpper.includes('PRO');
     const titleElem = document.getElementById("sub-plan-title");
     const cycleElem = document.getElementById("sub-plan-cycle");
     const assetsElem = document.getElementById("sub-assets-quota");
@@ -1298,11 +1353,11 @@ async function loadTenantSubscription() {
     const statusElem = document.getElementById("sub-status-badge");
     const expiryElem = document.getElementById("sub-expiry-date");
 
-    if (titleElem) titleElem.textContent = isEnt ? "Enterprise Sovereign Node" : "Community Edition (Free)";
-    if (cycleElem) cycleElem.textContent = isEnt ? "Node-Locked • Air-Gapped Workstation" : "Local Sovereign Workstation • Unlimited";
-    if (assetsElem) assetsElem.textContent = isEnt ? "Unlimited Local Assets" : "Local Workspace Scanner";
-    if (agentsElem) agentsElem.textContent = isEnt ? "Multi-Core High-Throughput" : "Local Node Scanner";
-    if (supportElem) supportElem.textContent = isEnt ? "Enterprise Priority Support" : "Community Open Source";
+    if (titleElem) titleElem.textContent = isEnt ? "Enterprise Sovereign Node" : (isPro ? "Professional Sovereign Node" : "Community Edition (Free)");
+    if (cycleElem) cycleElem.textContent = isEnt ? "Node-Locked • Air-Gapped Workstation" : (isPro ? "Node-Locked • Professional Workstation" : "Local Sovereign Workstation • Community");
+    if (assetsElem) assetsElem.textContent = isEnt ? "Unlimited Local Assets" : (isPro ? "Up to 500 Cryptographic Assets" : "Up to 25 Local Assets");
+    if (agentsElem) agentsElem.textContent = isEnt ? "Multi-Core High-Throughput" : (isPro ? "16 SentinelOps Agent Nodes" : "Single Local Node Scanner");
+    if (supportElem) supportElem.textContent = isEnt ? "Enterprise Priority Support" : (isPro ? "Priority Developer Support" : "Community Open Source");
     if (statusElem) statusElem.textContent = "ACTIVE (Air-Gapped)";
     if (expiryElem) expiryElem.textContent = lic.expires_at ? `Valid until ${lic.expires_at}` : "Permanent / Non-Expiring";
 
@@ -1573,6 +1628,9 @@ function initMoscaCalculator() {
     slider.addEventListener("input", calculateMosca);
   });
   calculateMosca();
+  if (typeof loadTenantOverview === 'function') {
+    loadTenantOverview();
+  }
 }
 
 function calculateMosca() {
