@@ -357,6 +357,169 @@
           <button class="btn-outline" style="width: 100%; justify-content: center;" onclick="openAuthModal('register')">Contact Enterprise Sales</button>
         </div>
       </div>
+
+      <!-- Interactive Feature Comparison Matrix -->
+      <div style="margin-top: 3.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: 0 16px 40px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span class="section-tag" style="margin-bottom: 0.3rem;">Feature Comparison</span>
+            <h3 style="color: var(--text-main); font-size: 1.4rem; margin: 0 0 0.3rem 0;">Matriks Detail Perbandingan Fitur Paket</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Panduan kapabilitas teknis dan pemetaan modul per tingkatan lisensi (Community vs Professional vs Enterprise Sovereign).</p>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-dim);">
+                <th style="padding: 12px 16px; font-weight: 700;">Modul / Kapabilitas Teknis</th>
+                <th style="padding: 12px 16px; color: #c084fc; font-weight: 700;">🌱 Community (Free)</th>
+                <th style="padding: 12px 16px; color: var(--accent-cyan); font-weight: 700;">⭐ Professional Tier</th>
+                <th style="padding: 12px 16px; color: var(--accent-emerald); font-weight: 700;">🛡️ Enterprise Sovereign</th>
+              </tr>
+            </thead>
+            <tbody style="color: var(--text-main);">
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">Peruntukan &amp; Skenario Penggunaan</td>
+                <td style="padding: 10px 16px;">Evaluasi &amp; Riset Personal</td>
+                <td style="padding: 10px 16px;">DevSecOps &amp; Integrasi Tim</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">Bank, BUMN, Militer &amp; Air-Gap</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; font-weight: 600;">Kapasitas Aset &amp; Node Mesin</td>
+                <td style="padding: 10px 16px;">Maks. 25 Aset (1 Node)</td>
+                <td style="padding: 10px 16px;">Hingga 500 Aset (16 Nodes)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">Unlimited Assets &amp; Cluster</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">CBOM Discovery, Deduplikasi &amp; Shadow Crypto</td>
+                <td style="padding: 10px 16px;">✅ Standar</td>
+                <td style="padding: 10px 16px;">✅ Penuh (Mode Scan &amp; Keystore)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald);">✅ Deterministik SHA-256 + Diff Tracking</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; font-weight: 600;">PQC Code Playbooks &amp; Refactoring</td>
+                <td style="padding: 10px 16px;">✅ Snippet Dasar</td>
+                <td style="padding: 10px 16px;">✅ Full Generator Engine</td>
+                <td style="padding: 10px 16px;">✅ Full Enterprise Multi-Language</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">AI Mosca Risk (SNDL Exposure Horizon)</td>
+                <td style="padding: 10px 16px;">✅ Simulasi Standar</td>
+                <td style="padding: 10px 16px;">✅ Telemetri Dinamis</td>
+                <td style="padding: 10px 16px;">✅ Prediktif Threat Modeling</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; font-weight: 600;">Crypto Agility Benchmark &amp; Stress Testing</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--accent-cyan); font-weight: 600;">✅ Terbuka Penuh</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">✅ Terbuka Penuh</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">CI/CD Gatekeeper (Shift-Left Pipeline)</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--accent-cyan); font-weight: 600;">✅ Terbuka Penuh</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">✅ Terbuka Penuh</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; font-weight: 600;">Zero-Code PQC Reverse Proxy Gateway</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--accent-cyan); font-weight: 600;">✅ Terbuka Penuh (Envoy/Nginx)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">✅ Terbuka Penuh (Envoy/Nginx)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">Recurring Cron &amp; Certificate Drift Alert</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--accent-cyan); font-weight: 600;">✅ Terbuka Penuh (&lt;30 Hari)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">✅ Terbuka Penuh (&lt;30 Hari)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; font-weight: 600;">Global Compliance &amp; Executive Export</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--accent-cyan); font-weight: 600;">✅ Terbuka Penuh (PDF/JSON)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">✅ Terbuka Penuh (Audit Grade)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">Quantum-Safe CA &amp; PKI Bridge (FIPS 203)</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci (Paket Ent)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">🛡️ Eksklusif Enterprise</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; font-weight: 600;">ZentyTunnel PQC VPN (Zero-Trust)</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci (Paket Ent)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">🛡️ Eksklusif Enterprise</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 10px 16px; font-weight: 600;">Merkle Audit &amp; Immutable Ecosystem Ledger</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci (Paket Ent)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">🛡️ Eksklusif Enterprise</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 16px; font-weight: 600;">SentinelOps Autonomous Remediation Daemon</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci</td>
+                <td style="padding: 10px 16px; color: var(--text-dim);">🔒 Terkunci (Paket Ent)</td>
+                <td style="padding: 10px 16px; color: var(--accent-emerald); font-weight: 600;">🛡️ Multi-Core Canary &amp; Rollback</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panduan Upgrade Versi & Aktivasi Lisensi Air-Gap -->
+      <div style="margin-top: 2rem; background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(168,85,247,0.06)); border: 1px solid rgba(6,182,212,0.25); border-radius: var(--radius-lg); padding: 2rem;">
+        <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📖</div>
+          <div>
+            <h3 style="color: var(--text-main); font-size: 1.25rem; margin: 0 0 0.2rem 0;">Panduan Cepat Upgrade Versi &amp; Aktivasi Lisensi</h3>
+            <p style="color: var(--text-muted); font-size: 0.84rem; margin: 0;">Langkah mudah memperbarui binary aplikasi atau mengaktifkan lisensi Professional / Enterprise Sovereign secara luring (offline air-gap).</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin-top: 1.5rem;">
+          <div style="background: rgba(0,0,0,0.3); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: var(--accent-cyan); font-weight: 700; font-size: 0.88rem;">
+              <span style="width: 22px; height: 22px; border-radius: 50%; background: rgba(6,182,212,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">1</span>
+              Unduh Binary / Rilis Terbaru
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin: 0;">
+              Unduh paket <code>ZentyQuetry-v1.0.0-windows-x64.zip</code> dari repositori resmi. Ekstrak dan ganti file biner atau jalankan langsung tanpa menghapus konfigurasi lama.
+            </p>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.3); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: var(--accent-cyan); font-weight: 700; font-size: 0.88rem;">
+              <span style="width: 22px; height: 22px; border-radius: 50%; background: rgba(6,182,212,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</span>
+              Periksa Hardware Node ID
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin: 0;">
+              Buka aplikasi desktop, salin <code>Node ID</code> mesin Anda di menu <em>Subscription &amp; License</em> (misal: <code>ZQ-NODE-XXXX-XXXX</code>) sebagai identitas hardware anti-duplikasi.
+            </p>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.3); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: var(--accent-cyan); font-weight: 700; font-size: 0.88rem;">
+              <span style="width: 22px; height: 22px; border-radius: 50%; background: rgba(6,182,212,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">3</span>
+              Terbitkan Lisensi Kriptografi
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin: 0;">
+              Gunakan portal License Authority (<code>http://127.0.0.1:9528</code>), pilih paket <strong>Professional</strong> atau <strong>Enterprise Sovereign</strong>, lalu terbitkan berkas <code>license.lic</code>.
+            </p>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.3); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: var(--accent-emerald); font-weight: 700; font-size: 0.88rem;">
+              <span style="width: 22px; height: 22px; border-radius: 50%; background: rgba(16,185,129,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">4</span>
+              Otomatis Aktif (Zero Prompt)
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin: 0;">
+              Letakkan <code>license.lic</code> di folder aplikasi. Jalankan <code>ZentyQuetry.exe</code>, semua modul berlisensi langsung terbuka penuh seketika tanpa perlu koneksi internet.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Downloads Section -->
